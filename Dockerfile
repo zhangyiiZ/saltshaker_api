@@ -10,7 +10,7 @@ RUN set -xe \
                       libc-dev \
                       git \
                       tzdata \
-    && git clone https://github.com/saltshaker-plus/saltshaker_api.git -b master /data0/saltshaker_api \
+    && git clone --depth 1 https://github.com/zhangyiiZ/saltshaker_api.git -b master /data0/saltshaker_api \
     && pip install -r /data0/saltshaker_api/requirements.txt \
     && mkdir -p /var/log/saltshaker_plus \
     && mkdir -p /var/log/gunicorn \
