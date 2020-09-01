@@ -13,6 +13,7 @@ RUN set -xe \
                       git \
                       tzdata \
     && git clone --depth 1 https://github.com/zhangyiiZ/saltshaker_api.git -b master /data0/saltshaker_api \
+    && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
     && pip --default-timeout=1000 install -r /data0/saltshaker_api/requirements.txt \
     && mkdir -p /var/log/saltshaker_plus \
     && mkdir -p /var/log/gunicorn \
