@@ -134,3 +134,7 @@ api.add_resource(ServiceStatus, "/saltshaker/api/v1.0/dashboard/status")
 
 # sls
 api.add_resource(SLSCreate, "/saltshaker/api/v1.0/sls/create")
+
+# lcy
+api.add_resource(HostList, "/saltshaker/api/v1.0/lcy")
+api.add_resource(Host, "/saltshaker/api/v1.0/lcy/<string:host_id>")
