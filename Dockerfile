@@ -3,6 +3,8 @@ MAINTAINER  yongpeng1 for sina as <yueyongyue@sina.cn>
 ENV TZ "Asia/Shanghai"
 ENV S "saltshaker.conf"
 
+CMD sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 RUN set -xe \
     && echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.4/main" > /etc/apk/repositories \
     && apk --no-cache add gcc \
