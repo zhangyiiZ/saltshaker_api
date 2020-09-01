@@ -137,6 +137,5 @@ api.add_resource(SLSCreate, "/saltshaker/api/v1.0/sls/create")
 
 # monitor
 api.add_resource(GroupsList, "/saltshaker/api/v1.0/monitor")
-api.add_resource(Groups, "/saltshaker/api/v1.0/groups/<string:groups_id>")
-api.add_resource(HostList, "/saltshaker/api/v1.0/lcy")
+api.add_resource(Groups, "/saltshaker/api/v1.0/monitor/<string:groups_id>")
 api.add_resource(Host, "/saltshaker/api/v1.0/lcy/<string:host_id>")
