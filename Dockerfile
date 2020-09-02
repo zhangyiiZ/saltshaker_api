@@ -1,22 +1,14 @@
-FROM python:3.6.6-alpine
+FROM yueyongyue/saltshaker_api:1.12.1
 MAINTAINER  yongpeng1 for sina as <yueyongyue@sina.cn>
 ENV TZ "Asia/Shanghai"
 ENV S "saltshaker.conf"
 
 RUN set -xe \
     && echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.4/main" > /etc/apk/repositories \
-    && apk --no-cache add gcc \
-                      linux-headers \
-                      libc-dev \
-                      git \
-                      tzdata \
+    && rm -rf /data0/saltshaker_api \
     && git clone --depth 1 https://github.com/zhangyiiZ/saltshaker_api.git -b master /data0/saltshaker_api \
-    && pip --default-timeout=1000 install -r /data0/saltshaker_api/requirements.txt \
-    && mkdir -p /var/log/saltshaker_plus \
-    && mkdir -p /var/log/gunicorn \
     && echo "${TZ}" > /etc/timezone \
-    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
-    && pip install git+https://github.com/Supervisor/supervisor@master
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
 
 CMD cd /data0/saltshaker_api/ && \
 sed -i "s/\(MYSQL_HOST = \).*/\1${MYSQL_HOST}/g" ${S} && \
