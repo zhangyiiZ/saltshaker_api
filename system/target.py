@@ -29,7 +29,7 @@ class Target(Resource):
     @access_required(role_dict["common_user"])
     def get(self, target_id):
         db = DB()
-        status, result = db.select_by_id("product", target_id)
+        status, result = db.select_by_id("target", target_id)
         db.close_mysql()
         if status is True:
             if result:
@@ -43,7 +43,7 @@ class Target(Resource):
     def delete(self, target_id):
         user = g.user_info["username"]
         db = DB()
-        status, result = db.delete_by_id("product", target_id)
+        status, result = db.delete_by_id("target", target_id)
         db.close_mysql()
         if status is not True:
             logger.error("Delete product error: %s" % result)
@@ -63,30 +63,30 @@ class Target(Resource):
         user = g.user_info["username"]
         args = parser.parse_args()
         args["id"] = target_id
-        product = args
+        target = args
         db = DB()
         # 判断是否存在
-        select_status, select_result = db.select_by_id("product", target_id)
+        select_status, select_result = db.select_by_id("target", target_id)
         if select_status is not True:
             db.close_mysql()
-            logger.error("Modify product error: %s" % select_result)
+            logger.error("Modify target error: %s" % select_result)
             return {"status": False, "message": select_result}, 500
         if not select_result:
             db.close_mysql()
             return {"status": False, "message": "%s does not exist" % target_id}, 404
         # 判断名字是否重复
-        status, result = db.select("product", "where data -> '$.name'='%s'" % args["target"])
+        status, result = db.select("target", "where data -> '$.name'='%s'" % args["target"])
         if status is True:
             if result:
                 if target_id != result[0].get("id"):
                     db.close_mysql()
-                    return {"status": False, "message": "The product name already exists"}, 200
-        status, result = db.update_by_id("product", json.dumps(product, ensure_ascii=False), target_id)
+                    return {"status": False, "message": "The target already exists"}, 200
+        status, result = db.update_by_id("target", json.dumps(target, ensure_ascii=False), target_id)
         db.close_mysql()
         if status is not True:
-            logger.error("Modify product error: %s" % result)
+            logger.error("Modify target: %s" % result)
             return {"status": False, "message": result}, 500
-        audit_log(user, args["id"], target_id, "product", "edit")
+        audit_log(user, args["id"], target_id, "target", "edit")
 
 class TargetList(Resource):
     @access_required(role_dict["common_user"])
@@ -102,7 +102,7 @@ class TargetList(Resource):
             if role_status and role_result:
                 for role in role_result:
                     if role["tag"] == 0:
-                        status, result = db.select("product", "")
+                        status, result = db.select("target", "")
                         db.close_mysql()
                         target_list = []
                         if status is True:
@@ -115,15 +115,15 @@ class TargetList(Resource):
         sql_list = []
         target_list = []
         if user_info["product"]:
-            for product in user_info["product"]:
-                sql_list.append("data -> '$.id'='%s'" % product)
+            for target in user_info["product"]:
+                sql_list.append("data -> '$.id'='%s'" % target)
             sql = " or ".join(sql_list)
-            status, result = db.select("product", "where %s" % sql)
+            status, result = db.select("target", "where %s" % sql)
             db.close_mysql()
             if status is True:
                 if result:
-                    product_list = result
-                    return {"data": product_list, "status": True, "message": ""}, 200
+                    target_list = result
+                    return {"data": target_list, "status": True, "message": ""}, 200
                 else:
                     return {"status": False, "message": "Group does not exist"}, 404
             else:
@@ -136,27 +136,27 @@ class TargetList(Resource):
         args["id"] = uuid_prefix("p")
         user = g.user_info["username"]
         user_id = g.user_info["id"]
-        product = args
+        target = args
         db = DB()
-        status, result = db.select("product", "where data -> '$.name'='%s'" % args["target"])
+        status, result = db.select("target", "where data -> '$.name'='%s'" % args["target"])
         if status is True:
             if len(result) == 0:
                 # 给用户添加产品线
                 info = update_user_product(user_id, args["id"])
                 if info["status"] is False:
                     return {"status": False, "message": info["message"]}, 500
-                insert_status, insert_result = db.insert("product", json.dumps(product, ensure_ascii=False))
+                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
                 db.close_mysql()
                 if insert_status is not True:
-                    logger.error("Add product error: %s" % insert_result)
+                    logger.error("Add target error: %s" % insert_result)
                     return {"status": False, "message": insert_result}, 500
-                audit_log(user, args["id"], "", "product", "add")
+                audit_log(user, args["id"], "", "target", "add")
             else:
                 db.close_mysql()
-                return {"status": False, "message": "The product name already exists"}, 200
+                return {"status": False, "message": "The target already exists"}, 200
         else:
             db.close_mysql()
-            logger.error("Select product name error: %s" % result)
+            logger.error("Select target error: %s" % result)
             return {"status": False, "message": result}, 500
 
 
