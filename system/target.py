@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, request
 from flask import g
 from common.log import loggers
 from common.audit_log import audit_log
@@ -7,6 +7,8 @@ from common.db import DB
 from common.utility import uuid_prefix
 from common.sso import access_required
 import json
+
+from fileserver.git_fs import gitlab_project
 from system.user import update_user_privilege, update_user_product
 from common.const import role_dict
 from fileserver.rsync_fs import rsync_config
@@ -158,6 +160,22 @@ class TargetList(Resource):
             db.close_mysql()
             logger.error("Select target error: %s" % result)
             return {"status": False, "message": result}, 500
+
+# 上传文件
+class UploadTarget(Resource):
+    @access_required(role_dict["common_user"])
+    def post(self):
+        args = parser.parse_args()
+        user = g.user_info["username"]
+        file = request.files['file']
+        logger.info("firename:"+file.filename)
+        content = file.read()
+        try:
+            content_decode = content.decode()
+            logger.info("上传文件："+content_decode)
+            return {"status": True, "message": ""}, 200
+        except Exception as e:
+            return {"status": False, "message": str(e)}, 500
 
 
 

@@ -5,7 +5,7 @@ from resources.job import Job, JobList, JobManager
 from resources.event import Event, EventList
 from system.product import ProductList, Product, ProductCheck
 from system.role import RoleList, Role
-from system.target import TargetList, Target
+from system.target import TargetList, Target, UploadTarget
 from system.user import UserList, User, Register, ResetPassword, ResetPasswordByOwner, ChangeUserInfo
 from system.login import Login
 from system.acl import ACLList, ACL
@@ -139,3 +139,4 @@ api.add_resource(SLSCreate, "/saltshaker/api/v1.0/sls/create")
 #monitor
 api.add_resource(TargetList, "/saltshaker/api/v1.0/target")
 api.add_resource(Target, "/saltshaker/api/v1.0/target/<string:target_id>")
+api.add_resource(UploadTarget, "/saltshaker/api/v1.0/target/upload")
