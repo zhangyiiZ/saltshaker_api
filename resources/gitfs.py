@@ -153,11 +153,13 @@ class Upload(Resource):
         user = g.user_info["username"]
         project, _ = gitlab_project(args["product_id"], args["project_type"])
         file = request.files['file']
+        logger.info(file.filename)
         if args["path"]:
             file_path = args["path"] + "/" + file.filename
         content = file.read()
         try:
             content_decode = content.decode()
+            logger.info("上传文件："+content_decode)
             actions = [
                 {
                     'action': 'create',
