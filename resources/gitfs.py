@@ -153,7 +153,7 @@ class Upload(Resource):
         user = g.user_info["username"]
         project, _ = gitlab_project(args["product_id"], args["project_type"])
         file = request.files['file']
-        logger.info(file.filename)
+        logger.info("firename:"+file.filename+"product_id:"+args["product_id"]+"project_type:"+args["project_type"]+"branch:"+args["branch"]+"path:"+args["path"])
         if args["path"]:
             file_path = args["path"] + "/" + file.filename
         content = file.read()
