@@ -165,16 +165,13 @@ class TargetList(Resource):
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
-        logger.info("UPLOADTARGET")
-        logger.info("UPLOADTARGET2")
         file = request.files['file']
-        logger.info("UPLOADTARGET3")
         logger.info("firename:"+file.filename)
         content = file.read()
+        logger.info("content:"+content)
         try:
             content_decode = content.decode()
             logger.info("上传文件："+content_decode)
-            logger.info("UPLOADTARGET4")
             return {"status": True, "message": ""}, 200
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
