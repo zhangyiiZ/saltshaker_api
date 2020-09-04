@@ -186,7 +186,6 @@ class UploadTarget(Resource):
                 status, result = db.select("target", "where data -> '$.name'='%s'" % target)
                 if status is True:
                     if len(result) == 0:
-                        # 给用户添加产品线
                         info = update_user_product(user_id, args["id"])
                         if info["status"] is False:
                             return {"status": False, "message": info["message"]}, 500
