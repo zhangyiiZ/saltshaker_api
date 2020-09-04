@@ -92,6 +92,8 @@ class Target(Resource):
             logger.error("Modify target: %s" % result)
             return {"status": False, "message": result}, 500
         audit_log(user, args["id"], target_id, "target", "edit")
+        return {"status": True, "message": result}, 200
+
 
 class TargetList(Resource):
     @access_required(role_dict["common_user"])
@@ -168,47 +170,30 @@ class TargetList(Resource):
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
-        logger.info("???")
-        args = parser.parse_args()
-        user_id = g.user_info["id"]
-        user = g.user_info["username"]
-        args["id"] = uuid_prefix("p")
         file = request.files['file']
         file.save(os.path.join('/tmp', file.filename))
-        logger.info("??")
         db = DB()
         try:
             xlsx_file = Xlsx(os.path.join('/tmp', file.filename))
             xlsx_file.read()
-            config_result = xlsx_file.export()
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
-            logger.info(targets)
             for target in targets:
                 status, result = db.select("target", "where data -> '$.name'='%s'" % target)
                 if status is True:
                     if len(result) == 0:
-                        info = update_user_product(user_id, args["id"])
-                        if info["status"] is False:
-                            return {"status": False, "message": info["message"]}, 500
                         insert_status, insert_result = db.insert("target", target)
-                        db.close_mysql()
                         if insert_status is not True:
-                            logger.error("Add target error: %s" % insert_result)
                             return {"status": False, "message": insert_result}, 500
-                        audit_log(user, args["id"], "", "target", "add")
                     else:
-                        db.close_mysql()
                         return {"status": False, "message": "The target already exists"}, 200
                 else:
-                    db.close_mysql()
-                    logger.error("Select target error: %s" % result)
                     return {"status": False, "message": result}, 500
-            db.close_mysql()
             return {"status": True, "message": ""}, 200
         except Exception as e:
-            db.close_mysql()
             return {"status": False, "message": str(e)}, 500
+        finally:
+            db.close_mysql()
 
 
 
