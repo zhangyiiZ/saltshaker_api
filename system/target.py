@@ -166,8 +166,6 @@ class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
         logger.info("UPLOADTARGET")
-        args = parser.parse_args()
-        user = g.user_info["username"]
         logger.info("UPLOADTARGET2")
         file = request.files['file']
         logger.info("UPLOADTARGET3")
