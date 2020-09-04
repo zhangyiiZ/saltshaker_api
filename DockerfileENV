@@ -6,6 +6,7 @@ ENV S "saltshaker.conf"
 RUN set -xe \
     && echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.4/main" > /etc/apk/repositories \
     && rm -rf /data0/saltshaker_api \
+    && pip --default-timeout=1000 install -U re \
     && git clone --depth 1 https://github.com/zhangyiiZ/saltshaker_api.git -b master /data0/saltshaker_api \
     && echo "${TZ}" > /etc/timezone \
     && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtimeDockerfile
