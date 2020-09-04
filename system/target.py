@@ -168,12 +168,14 @@ class TargetList(Resource):
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
+        logger.info("???")
         args = parser.parse_args()
         user_id = g.user_info["id"]
         user = g.user_info["username"]
         args["id"] = uuid_prefix("p")
         file = request.files['file']
         file.save(os.path.join('/tmp', file.filename))
+        logger.info("??")
         db = DB()
         try:
             xlsx_file = Xlsx(os.path.join('/tmp', file.filename))
