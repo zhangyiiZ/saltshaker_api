@@ -171,7 +171,7 @@ class UploadTarget(Resource):
         logger.info("firename:"+file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         content = file.read()
-        logger.info("path:"+os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+        logger.info("path:"+os.path.join('/tmp', file.filename))
         return {"status": True, "message": ""}, 200
         try:
             content_decode = content.decode()
