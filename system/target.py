@@ -30,6 +30,7 @@ parser.add_argument("pool", type=str, required=True, trim=True)
 class Target(Resource):
     @access_required(role_dict["common_user"])
     def get(self, target_id):
+        logger.info("Target")
         db = DB()
         status, result = db.select_by_id("target", target_id)
         db.close_mysql()
@@ -43,6 +44,7 @@ class Target(Resource):
 
     @access_required(role_dict["product"])
     def delete(self, target_id):
+        logger.info("Target")
         user = g.user_info["username"]
         db = DB()
         status, result = db.delete_by_id("target", target_id)
@@ -62,6 +64,7 @@ class Target(Resource):
 
     @access_required(role_dict["product"])
     def put(self, target_id):
+        logger.info("Target")
         user = g.user_info["username"]
         args = parser.parse_args()
         args["id"] = target_id
@@ -93,6 +96,7 @@ class Target(Resource):
 class TargetList(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
+        logger.info("TargetList")
         db = DB()
         user_info = g.user_info
         role_sql = []
@@ -134,6 +138,7 @@ class TargetList(Resource):
 
     @access_required(role_dict["product"])
     def post(self):
+        logger.info("TargetList")
         args = parser.parse_args()
         args["id"] = uuid_prefix("p")
         user = g.user_info["username"]
@@ -165,6 +170,7 @@ class TargetList(Resource):
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
+        logger.info("UPLOADTARGET")
         args = parser.parse_args()
         user = g.user_info["username"]
         project, _ = gitlab_project(args["product_id"], args["project_type"])
