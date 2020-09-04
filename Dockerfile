@@ -1,4 +1,4 @@
-FROM yueyongyue/saltshaker_api:1.12.1
+FROM saltshaker_endenv:1
 MAINTAINER  yongpeng1 for sina as <yueyongyue@sina.cn>
 ENV TZ "Asia/Shanghai"
 ENV S "saltshaker.conf"

@@ -9,6 +9,7 @@ from common.db import DB
 from common.utility import uuid_prefix
 from common.sso import access_required
 import json
+import xlrd,re
 
 from fileserver.git_fs import gitlab_project
 from system.user import update_user_privilege, update_user_product
@@ -170,10 +171,10 @@ class UploadTarget(Resource):
         file = request.files['file']
         logger.info("firename:"+file.filename)
         file.save(os.path.join('/tmp', file.filename))
-        f = open(os.path.join('/tmp', file.filename))
-        logger.info("打开")
-        logger.info(f.read())
-        f.close()
+        xlsx = Xlsx(os.path.join('/tmp', file.filename))
+        xlsx.read()
+        result =xlsx.export()
+        logger.info("输出信息"+result)
         return {"status": True, "message": ""}, 200
         try:
             content_decode = content.decode()
@@ -182,7 +183,57 @@ class UploadTarget(Resource):
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
 
+class Xlsx():
+    def __init__(self,xlsx):
+        self.data = xlrd.open_workbook(xlsx)
+        logger.info("打开成功")
+        self.sheet = self.data.sheet_by_index(0)
+        self.l = []
+    def read(self):
+        global l
+        for i in range(self.sheet.nrows):
+            if i == 0:
+                pass
+            else:
+                self.l.append(self.sheet.row_values(i))
+        logger.info("读取信息成功")
+        return self.l
+    def export(self):
+        subdic = {}
+        result = []
+        strresult = '['
 
+        if self.l:
+            for i in self.l:
+                dic = {}
+                l2 = []
+                l2.append(i[3])
+                h3c = re.match(r'h3c',i[2],re.I)
+                hw = re.match(r'hw',i[2],re.I)
+                zte = re.match(r'zte',i[2],re.I)
+                if h3c:
+                    model = re.sub(h3c.group(0),'华三',i[2])
+                elif hw:
+                    model = re.sub(hw.group(0),'华为',i[2])
+                elif zte:
+                    model = re.sub(zte.group(0),'中兴',i[2])
+                else:
+                    model = i[2]
+                subdic["IP"] = i[3]
+                subdic["location"] = i[0]
+                subdic["model"] = model
+                subdic["type"] = i[1]
+                dic["targets"] = l2
+                dic["labels"] = subdic
+                #print(str(dic))
+                if i != self.l[-1]:
+                    strresult=strresult+str(dic)+',\n'
+                else:
+                    strresult = strresult +str(dic) + ']'
+                result.append(dic)
+        strresult=strresult.replace("'",'"')
+        logger.info("返回结果值")
+        return strresult
 
 
 
