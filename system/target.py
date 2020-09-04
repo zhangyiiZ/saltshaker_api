@@ -182,7 +182,7 @@ class UploadTarget(Resource):
             targets = config_db_result.split(';')
             logger.info(targets)
             for target in targets:
-                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+                insert_status, insert_result = db.insert("target", target)
                 if insert_status is not True:
                     logger.error("Add target error: %s" % insert_result)
                     db.close_mysql()
