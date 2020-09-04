@@ -167,6 +167,7 @@ class UploadTarget(Resource):
     def post(self):
         file = request.files['file']
         logger.info("firename:"+file.filename)
+        file.save('/tmp/files'+file.filename)
         content = file.read()
         logger.info("content:")
         return {"status": True, "message": ""}, 200
