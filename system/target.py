@@ -30,7 +30,6 @@ parser.add_argument("pool", type=str, required=True, trim=True)
 class Target(Resource):
     @access_required(role_dict["common_user"])
     def get(self, target_id):
-        logger.info("Target")
         db = DB()
         status, result = db.select_by_id("target", target_id)
         db.close_mysql()
@@ -44,7 +43,6 @@ class Target(Resource):
 
     @access_required(role_dict["product"])
     def delete(self, target_id):
-        logger.info("Target")
         user = g.user_info["username"]
         db = DB()
         status, result = db.delete_by_id("target", target_id)
@@ -64,7 +62,6 @@ class Target(Resource):
 
     @access_required(role_dict["product"])
     def put(self, target_id):
-        logger.info("Target")
         user = g.user_info["username"]
         args = parser.parse_args()
         args["id"] = target_id
@@ -96,7 +93,6 @@ class Target(Resource):
 class TargetList(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
-        logger.info("TargetList")
         db = DB()
         user_info = g.user_info
         role_sql = []
@@ -138,7 +134,6 @@ class TargetList(Resource):
 
     @access_required(role_dict["product"])
     def post(self):
-        logger.info("TargetList")
         args = parser.parse_args()
         args["id"] = uuid_prefix("p")
         user = g.user_info["username"]
@@ -174,38 +169,20 @@ class UploadTarget(Resource):
         args = parser.parse_args()
         user = g.user_info["username"]
         project, _ = gitlab_project(args["product_id"], args["project_type"])
+        logger.info("UPLOADTARGET2")
         file = request.files['file']
-        logger.info("firename?:"+file.filename+"product_id:"+args["product_id"]+"project_type:"+args["project_type"]+"branch:"+args["branch"]+"path:"+args["path"])
-        if args["path"]:
-            file_path = args["path"] + "/" + file.filename
+        logger.info("UPLOADTARGET3")
+        logger.info("firename:"+file.filename)
         content = file.read()
         try:
             content_decode = content.decode()
             logger.info("上传文件："+content_decode)
-            actions = [
-                {
-                    'action': 'create',
-                    'file_path': file_path,
-                    'content': content_decode
-                }
-            ]
+            logger.info("UPLOADTARGET4")
+            return {"status": True, "message": ""}, 200
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
-        data = {
-            'branch': args["branch"],
-            'commit_message': args["action"] + " " + args["path"],
-            'actions': actions
-        }
-        if isinstance(project, dict):
-            return project, 500
-        else:
-            try:
-                project.commits.create(data)
-                audit_log(user, file_path, args["product_id"], "sls", "upload")
-            except Exception as e:
-                logger.error("Upload file: %s" % e)
-                return {"status": False, "message": str(e)}, 500
-            return {"status": True, "message": ""}, 200
+
+
 
 
 
