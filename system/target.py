@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
+import os
+
 from flask_restful import Resource, reqparse, request
-from flask import g
+from flask import g, app
 from common.log import loggers
 from common.audit_log import audit_log
 from common.db import DB
@@ -167,9 +169,9 @@ class UploadTarget(Resource):
     def post(self):
         file = request.files['file']
         logger.info("firename:"+file.filename)
-        file.save('/tmp/files'+file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         content = file.read()
-        logger.info("content:")
+        logger.info("path:"+os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         return {"status": True, "message": ""}, 200
         try:
             content_decode = content.decode()
