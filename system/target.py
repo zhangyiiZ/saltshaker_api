@@ -168,7 +168,6 @@ class UploadTarget(Resource):
         logger.info("UPLOADTARGET")
         args = parser.parse_args()
         user = g.user_info["username"]
-        project, _ = gitlab_project(args["product_id"], args["project_type"])
         logger.info("UPLOADTARGET2")
         file = request.files['file']
         logger.info("UPLOADTARGET3")
