@@ -167,15 +167,39 @@ class UploadTarget(Resource):
     def post(self):
         args = parser.parse_args()
         user = g.user_info["username"]
+        project, _ = gitlab_project(args["product_id"], args["project_type"])
         file = request.files['file']
-        logger.info("firename:"+file.filename)
+        logger.info("firename?:"+file.filename+"product_id:"+args["product_id"]+"project_type:"+args["project_type"]+"branch:"+args["branch"]+"path:"+args["path"])
+        if args["path"]:
+            file_path = args["path"] + "/" + file.filename
         content = file.read()
         try:
             content_decode = content.decode()
             logger.info("上传文件："+content_decode)
-            return {"status": True, "message": ""}, 200
+            actions = [
+                {
+                    'action': 'create',
+                    'file_path': file_path,
+                    'content': content_decode
+                }
+            ]
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
+        data = {
+            'branch': args["branch"],
+            'commit_message': args["action"] + " " + args["path"],
+            'actions': actions
+        }
+        if isinstance(project, dict):
+            return project, 500
+        else:
+            try:
+                project.commits.create(data)
+                audit_log(user, file_path, args["product_id"], "sls", "upload")
+            except Exception as e:
+                logger.error("Upload file: %s" % e)
+                return {"status": False, "message": str(e)}, 500
+            return {"status": True, "message": ""}, 200
 
 
 
