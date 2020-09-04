@@ -88,5 +88,7 @@ class Xlsx():
                     strresult = strresult + str(dic)
                 result.append(dic)
         strresult = strresult.replace("'", '"')
+        strresult = strresult.replace("[", '')
+        strresult = strresult.replace("]", '')
         logger.info("返回结果值")
         return strresult
