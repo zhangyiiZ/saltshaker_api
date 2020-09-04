@@ -169,6 +169,7 @@ class UploadTarget(Resource):
         logger.info("firename:"+file.filename)
         content = file.read()
         logger.info("content:"+content)
+        return {"status": True, "message": ""}, 200
         try:
             content_decode = content.decode()
             logger.info("上传文件："+content_decode)
