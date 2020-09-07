@@ -108,6 +108,7 @@ class Product(Resource):
 class ProductList(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
+        logger.info("ProductList")
         db = DB()
         user_info = g.user_info
         role_sql = []
@@ -145,6 +146,7 @@ class ProductList(Resource):
                     return {"status": False, "message": "Group does not exist"}, 404
             else:
                 return {"status": False, "message": result}, 500
+        logger.info('the product result'+product_list)
         return {"data": product_list, "status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
