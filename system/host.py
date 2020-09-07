@@ -63,6 +63,7 @@ class Host(Resource):
     @access_required(role_dict["common_user"])
     def put(self, host_id):
         logger.info("HOSTPUT")
+        logger.info(host_id)
         user = g.user_info["username"]
         args = parser.parse_args()
         args["id"] = host_id
