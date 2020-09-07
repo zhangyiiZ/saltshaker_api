@@ -146,7 +146,6 @@ class ProductList(Resource):
                     return {"status": False, "message": "Group does not exist"}, 404
             else:
                 return {"status": False, "message": result}, 500
-        logger.info('the product result'+','.join(product_list))
         return {"data": product_list, "status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
