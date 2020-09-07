@@ -246,7 +246,7 @@ class HostListForTarget(Resource):
             db.close_mysql()
             return {"status": False, "message": result}, 500
         db.close_mysql()
-        logger.info('the return result'+host_list)
+        logger.info('the return result'+','.join(host_list))
         return {"data": host_list, "status": True, "message": ""}, 200
 
     @access_required(role_dict["common_user"])
