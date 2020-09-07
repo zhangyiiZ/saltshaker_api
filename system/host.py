@@ -14,7 +14,6 @@ logger = loggers()
 
 parser = reqparse.RequestParser()
 parser.add_argument("product_id", type=str, required=True, trim=True)
-parser.add_argument("host_id", type=str, required=True, trim=True)
 parser.add_argument("minion_id", type=str, required=True, trim=True)
 parser.add_argument("rename", type=str, default='', trim=True)
 parser.add_argument("tag", type=dict, default=[], action="append")
