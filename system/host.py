@@ -16,6 +16,7 @@ parser = reqparse.RequestParser()
 parser.add_argument("product_id", type=str, required=True, trim=True)
 parser.add_argument("host_id", type=str, required=True, trim=True)
 parser.add_argument("minion_id", type=str, required=True, trim=True)
+parser.add_argument("rename", type=str, default='', trim=True)
 parser.add_argument("tag", type=dict, default=[], action="append")
 
 
@@ -76,6 +77,7 @@ class Host(Resource):
             try:
                 host = select_result
                 host["tag"] = args["tag"]
+                host["rename"] = args["rename"]
                 status, result = db.update_by_id("host", json.dumps(host, ensure_ascii=False), host_id)
                 db.close_mysql()
                 if status is not True:
