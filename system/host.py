@@ -90,6 +90,7 @@ class Host(Resource):
                 logger.error("Modify %s host error: %s" % (host_id, e))
                 return {"status": False, "message": str(e)}, 500
         audit_log(user, args["id"], args["product_id"], "host", "edit")
+        logger.info("point 3")
         return {"status": True, "message": ""}, 200
 
 
