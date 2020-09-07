@@ -70,6 +70,7 @@ class Host(Resource):
         db = DB()
         # 判断是否存在
         select_status, select_result = db.select_by_id("host", host_id)
+        logger.info("point 1")
         if select_status is False:
             db.close_mysql()
             logger.error("Modify host error: %s" % select_result)
@@ -77,6 +78,7 @@ class Host(Resource):
         if select_result:
             try:
                 host = select_result
+                logger.info("point 2")
                 host["tag"] = args["tag"]
                 host["rename"] = args["rename"]
                 status, result = db.update_by_id("host", json.dumps(host, ensure_ascii=False), host_id)
