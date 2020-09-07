@@ -10,7 +10,7 @@ from system.user import UserList, User, Register, ResetPassword, ResetPasswordBy
 from system.login import Login
 from system.acl import ACLList, ACL
 from system.groups import GroupsList, Groups
-from system.host import HostList, Host
+from system.host import HostList, Host, HostListForTarget
 from resources.log import LogList
 from resources.cherry_stats import CherryStats
 from resources.execute import ExecuteShell, ExecuteSLS, ExecuteGroups
@@ -67,6 +67,7 @@ api.add_resource(Groups, "/saltshaker/api/v1.0/groups/<string:groups_id>")
 # host
 api.add_resource(HostList, "/saltshaker/api/v1.0/host")
 api.add_resource(Host, "/saltshaker/api/v1.0/host/<string:host_id>")
+api.add_resource(HostListForTarget, "/saltshaker/api/v1.0/host/target")
 
 # minions
 api.add_resource(MinionsStatus, "/saltshaker/api/v1.0/minions/status")

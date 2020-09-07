@@ -14,6 +14,7 @@ logger = loggers()
 
 parser = reqparse.RequestParser()
 parser.add_argument("product_id", type=str, required=True, trim=True)
+parser.add_argument("host_id", type=str, required=True, trim=True)
 parser.add_argument("minion_id", type=str, required=True, trim=True)
 parser.add_argument("tag", type=dict, default=[], action="append")
 
@@ -21,6 +22,7 @@ parser.add_argument("tag", type=dict, default=[], action="append")
 class Host(Resource):
     @access_required(role_dict["common_user"])
     def get(self, host_id):
+        logger.info("HOST")
         db = DB()
         status, result = db.select_by_id("host", host_id)
         if status is True:
@@ -59,6 +61,7 @@ class Host(Resource):
 
     @access_required(role_dict["common_user"])
     def put(self, host_id):
+        logger.info("HOST")
         user = g.user_info["username"]
         args = parser.parse_args()
         args["id"] = host_id
@@ -89,6 +92,7 @@ class Host(Resource):
 class HostList(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
+        logger.info("HOSTLIST")
         product_id = request.args.get("product_id")
         db = DB()
         status, result = db.select("host", "where data -> '$.product_id'='%s'" % product_id)
@@ -115,6 +119,7 @@ class HostList(Resource):
 
     @access_required(role_dict["common_user"])
     def post(self):
+        logger.info("HOSTLIST")
         args = parser.parse_args()
         args["id"] = uuid_prefix("h")
         user = g.user_info["username"]
@@ -228,3 +233,42 @@ class Hosts(object):
             else:
                 logger.error("Select %s host does not exist" % minion_id)
         db.close_mysql()
+
+class HostListForTarget(Resource):
+    @access_required(role_dict["common_user"])
+    def get(self):
+        logger.info("HostListForTarget")
+        db = DB()
+        status, result = db.select("host", "")
+        if status is True:
+            host_list = result
+        else:
+            db.close_mysql()
+            return {"status": False, "message": result}, 500
+        db.close_mysql()
+        return {"data": host_list, "status": True, "message": ""}, 200
+
+    @access_required(role_dict["common_user"])
+    def post(self):
+        args = parser.parse_args()
+        args["id"] = uuid_prefix("h")
+        user = g.user_info["username"]
+        host = args
+        db = DB()
+        status, result = db.select("host", "where data -> '$.minion_id'='%s'" % args["minion_id"])
+        if status is True:
+            if len(result) == 0:
+                insert_status, insert_result = db.insert("host", json.dumps(host, ensure_ascii=False))
+                db.close_mysql()
+                if insert_status is not True:
+                    logger.error("Add host error: %s" % insert_result)
+                    return {"status": False, "message": insert_result}, 500
+                audit_log(user, args["id"], args["product_id"], "host", "add")
+                return {"status": True, "message": ""}, 201
+            else:
+                db.close_mysql()
+                return {"status": False, "message": "The host name already exists"}, 200
+        else:
+            db.close_mysql()
+            logger.error("Select host name error: %s" % result)
+            return {"status": False, "message": result}, 500
