@@ -69,6 +69,7 @@ class Target(Resource):
     def put(self, target_id):
         user = g.user_info["username"]
         args = parser.parse_args()
+        logger.info(args['host_id'])
         args["id"] = target_id
         target = args
         db = DB()
