@@ -21,7 +21,7 @@ import gitlab
 logger = loggers()
 
 parser = reqparse.RequestParser()
-parser.add_argument("product_id", type=str, required=True, trim=True)
+parser.add_argument("host_id", type=str, required=True, trim=True)
 parser.add_argument("target", type=str, required=True, trim=True)
 parser.add_argument("IP", type=str, required=True, trim=True)
 parser.add_argument("location", type=str, required=True, trim=True)
