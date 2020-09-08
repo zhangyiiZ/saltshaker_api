@@ -22,14 +22,14 @@ logger = loggers()
 
 parser = reqparse.RequestParser()
 parser.add_argument("host_id", type=str, required=True, trim=True)
-parser.add_argument("target", type=str, required=True, trim=True)
-parser.add_argument("IP", type=str, required=True, trim=True)
-parser.add_argument("location", type=str, required=True, trim=True)
-parser.add_argument("model", type=str, required=True, trim=True)
-parser.add_argument("type", type=str, required=True, trim=True)
-parser.add_argument("project", type=str, required=True, trim=True)
-parser.add_argument("client", type=str, required=True, trim=True)
-parser.add_argument("pool", type=str, required=True, trim=True)
+parser.add_argument("target", type=str, default='', trim=True)
+parser.add_argument("IP", type=str, default='', trim=True)
+parser.add_argument("location", type=str, default='', trim=True)
+parser.add_argument("model", type=str, default='', trim=True)
+parser.add_argument("type", type=str, default='', trim=True)
+parser.add_argument("project", type=str, default='', trim=True)
+parser.add_argument("client", type=str, default='', trim=True)
+parser.add_argument("pool", type=str, default='', trim=True)
 
 
 class Target(Resource):
