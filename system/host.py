@@ -76,10 +76,8 @@ class Host(Resource):
             try:
                 host = select_result
                 if args['tag'] !=[]:
-                    logger.info('tag:'+host['tag']+' '+args['tag'])
                     host["tag"] = args["tag"]
                 if args['rename'] != '':
-                    logger.info('rename:'+host['rename']+' '+args['rename'])
                     host["rename"] = args["rename"]
                 status, result = db.update_by_id("host", json.dumps(host, ensure_ascii=False), host_id)
                 db.close_mysql()
