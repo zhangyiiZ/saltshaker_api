@@ -154,22 +154,22 @@ class UploadTarget(Resource):
         file.save(os.path.join('/tmp', file.filename))
         db = DB()
         try:
-            logger.info(1)
+            logger.info('1')
             xlsx_file = Xlsx(os.path.join('/tmp', file.filename))
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
             for target in targets:
-                logger.info(1)
+                logger.info('2')
                 target_dic = eval(target)
-                logger.info(2)
+                logger.info('3')
                 target_dic['host_id'] = host_id
                 logger.info('循环内部：'+target_dic['target'])
-                logger.info(3)
+                logger.info('4')
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
-                        logger.info(4)
+                        logger.info('5')
                         logger.info("sql结果："+result)
                         insert_status, insert_result = db.insert("target",json.dumps(target_dic, ensure_ascii=False) )
                         if insert_status is not True:
