@@ -147,8 +147,10 @@ class TargetList(Resource):
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
+        logger.info("UploadTarget")
         args = parser.parse_args()
         host_id = args['host_id']
+        logger.info('hostId:'+host_id)
         file = request.files['file']
         file.save(os.path.join('/tmp', file.filename))
         db = DB()
