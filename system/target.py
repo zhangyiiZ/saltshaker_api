@@ -121,7 +121,7 @@ class TargetList(Resource):
         user_id = g.user_info["id"]
         target = args
         db = DB()
-        status, result = db.select("target", "where data -> '$.name'='%s'" % args["target"])
+        status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
         if status is True:
             if len(result) == 0:
                 # 给用户添加产品线
@@ -154,18 +154,13 @@ class UploadTarget(Resource):
         file.save(os.path.join('/tmp', file.filename))
         db = DB()
         try:
-            logger.info('1')
             xlsx_file = Xlsx(os.path.join('/tmp', file.filename))
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
             for target in targets:
-                logger.info('2')
                 target_dic = eval(target)
-                logger.info('3')
                 target_dic['host_id'] = host_id
-                logger.info(str(target_dic))
-                logger.info('循环内部：'+target_dic['target'])
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
