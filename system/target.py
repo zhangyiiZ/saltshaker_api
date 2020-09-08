@@ -166,12 +166,10 @@ class UploadTarget(Resource):
                 target_dic['host_id'] = host_id
                 logger.info(str(target_dic))
                 logger.info('循环内部：'+target_dic['target'])
-                logger.info('4')
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
                         logger.info('5')
-                        logger.info("sql结果："+result)
                         insert_status, insert_result = db.insert("target",json.dumps(target_dic, ensure_ascii=False) )
                         if insert_status is not True:
                             return {"status": False, "message": insert_result}, 500
