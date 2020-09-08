@@ -148,30 +148,28 @@ class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
         logger.info("UploadTarget")
-        try:
-            args = parser.parse_args()
-            logger.info('1')
-        except Exception as e:
-            return {"status": False, "message": str(e)}, 500
-        logger.info('2')
+        args = parser.parse_args()
         host_id = args['host_id']
-        logger.info('3')
-        logger.info('hostId:'+host_id)
         file = request.files['file']
         file.save(os.path.join('/tmp', file.filename))
         db = DB()
         try:
+            logger.info(1)
             xlsx_file = Xlsx(os.path.join('/tmp', file.filename))
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
             for target in targets:
+                logger.info(1)
                 target_dic = eval(target)
+                logger.info(2)
                 target_dic['host_id'] = host_id
                 logger.info('循环内部：'+target_dic['target'])
+                logger.info(3)
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
+                        logger.info(4)
                         logger.info("sql结果："+result)
                         insert_status, insert_result = db.insert("target",json.dumps(target_dic, ensure_ascii=False) )
                         if insert_status is not True:
