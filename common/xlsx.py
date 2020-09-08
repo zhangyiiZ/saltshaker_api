@@ -81,7 +81,7 @@ class Xlsx():
                 dic["location"] = i[0]
                 dic["model"] = model
                 dic["type"] = i[1]
-                dic["target"] = l2
+                dic["target"] = i[3]
                 if i != self.l[-1]:
                     strresult = strresult + str(dic) + ';\n'
                 else:
