@@ -101,43 +101,16 @@ class Target(Resource):
 class TargetList(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
+        logger.info("TargetLIST")
+        host_id = request.args.get("host_id")
         db = DB()
-        user_info = g.user_info
-        role_sql = []
-        if user_info["role"]:
-            for role in user_info["role"]:
-                role_sql.append("data -> '$.id'='%s'" % role)
-            sql = " or ".join(role_sql)
-            role_status, role_result = db.select("role", "where %s" % sql)
-            if role_status and role_result:
-                for role in role_result:
-                    if role["tag"] == 0:
-                        status, result = db.select("target", "")
-                        db.close_mysql()
-                        target_list = []
-                        if status is True:
-                            if result:
-                                target_list = result
-                        else:
-                            return {"status": False, "message": result}, 500
-                        return {"data": target_list, "status": True, "message": ""}, 200
-
-        sql_list = []
-        target_list = []
-        if user_info["product"]:
-            for target in user_info["product"]:
-                sql_list.append("data -> '$.id'='%s'" % target)
-            sql = " or ".join(sql_list)
-            status, result = db.select("target", "where %s" % sql)
+        status, result = db.select("target", "where data -> '$.host_id'='%s'" % host_id)
+        if status is True:
+            target_list = result
+        else:
             db.close_mysql()
-            if status is True:
-                if result:
-                    target_list = result
-                    return {"data": target_list, "status": True, "message": ""}, 200
-                else:
-                    return {"status": False, "message": "Group does not exist"}, 404
-            else:
-                return {"status": False, "message": result}, 500
+            return {"status": False, "message": result}, 500
+        db.close_mysql()
         return {"data": target_list, "status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
@@ -183,7 +156,8 @@ class UploadTarget(Resource):
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
             for target in targets:
-                status, result = db.select("target", "where data -> '$.name'='%s'" % target)
+                logger.info('循环内部：'+target['target']+' :'+target)
+                status, result = db.select("target", "where data -> '$.target'='%s'" % target['target'])
                 if status is True:
                     if len(result) == 0:
                         insert_status, insert_result = db.insert("target", target)
