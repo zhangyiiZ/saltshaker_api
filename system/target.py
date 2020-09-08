@@ -148,8 +148,14 @@ class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
         logger.info("UploadTarget")
-        args = parser.parse_args()
+        try:
+            args = parser.parse_args()
+            logger.info('1')
+        except Exception as e:
+            return {"status": False, "message": str(e)}, 500
+        logger.info('2')
         host_id = args['host_id']
+        logger.info('3')
         logger.info('hostId:'+host_id)
         file = request.files['file']
         file.save(os.path.join('/tmp', file.filename))
