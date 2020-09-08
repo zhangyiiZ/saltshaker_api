@@ -147,6 +147,8 @@ class TargetList(Resource):
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
+        args = parser.parse_args()
+        host_id = args['host_id']
         file = request.files['file']
         file.save(os.path.join('/tmp', file.filename))
         db = DB()
@@ -157,11 +159,13 @@ class UploadTarget(Resource):
             targets = config_db_result.split(';')
             for target in targets:
                 target_dic = eval(target)
+                target_dic['host_id'] = host_id
                 logger.info('循环内部：'+target_dic['target'])
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
-                        insert_status, insert_result = db.insert("target", target)
+                        logger.info("sql结果："+result)
+                        insert_status, insert_result = db.insert("target",json.dumps(target_dic, ensure_ascii=False) )
                         if insert_status is not True:
                             return {"status": False, "message": insert_result}, 500
                     else:

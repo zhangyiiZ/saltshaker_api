@@ -77,7 +77,7 @@ class Xlsx():
                     model = re.sub(zte.group(0), '中兴', i[2])
                 else:
                     model = i[2]
-                dic["IP"] = i[3]
+                dic['IP'] = i[3]
                 dic["location"] = i[0]
                 dic["model"] = model
                 dic["type"] = i[1]
@@ -87,8 +87,5 @@ class Xlsx():
                 else:
                     strresult = strresult + str(dic)
                 result.append(dic)
-        strresult = strresult.replace("'", '"')
-        strresult = strresult.replace("[", '')
-        strresult = strresult.replace("]", '')
         logger.info("返回结果值")
         return strresult
