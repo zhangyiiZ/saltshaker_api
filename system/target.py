@@ -156,8 +156,9 @@ class UploadTarget(Resource):
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
             for target in targets:
-                logger.info('循环内部：'+target['target']+' :'+target)
-                status, result = db.select("target", "where data -> '$.target'='%s'" % target['target'])
+                target_dic = eval(target)
+                logger.info('循环内部：'+target_dic['target'])
+                status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
                         insert_status, insert_result = db.insert("target", target)
