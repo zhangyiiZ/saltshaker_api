@@ -149,7 +149,7 @@ class UploadTarget(Resource):
     def post(self):
         logger.info("UploadTarget")
         args = parser.parse_args()
-        logger.info('productid:'+args['product_id'])
+        logger.info('productid:'+args["product_id"])
         host_id = args['host_id']
         logger.info('hostId:'+host_id)
         file = request.files['file']
