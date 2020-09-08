@@ -62,14 +62,12 @@ class Host(Resource):
     @access_required(role_dict["common_user"])
     def put(self, host_id):
         logger.info("HOSTPUT")
-        logger.info(host_id)
         user = g.user_info["username"]
         args = parser.parse_args()
         args["id"] = host_id
         db = DB()
         # 判断是否存在
         select_status, select_result = db.select_by_id("host", host_id)
-        logger.info("point 1")
         if select_status is False:
             db.close_mysql()
             logger.error("Modify host error: %s" % select_result)
@@ -77,9 +75,10 @@ class Host(Resource):
         if select_result:
             try:
                 host = select_result
-                logger.info("point 2")
-                host["tag"] = args["tag"]
-                host["rename"] = args["rename"]
+                if args['tag'] !=[]:
+                    host["tag"] = args["tag"]
+                if args['rename'] != '':
+                    host["rename"] = args["rename"]
                 status, result = db.update_by_id("host", json.dumps(host, ensure_ascii=False), host_id)
                 db.close_mysql()
                 if status is not True:
@@ -90,7 +89,6 @@ class Host(Resource):
                 logger.error("Modify %s host error: %s" % (host_id, e))
                 return {"status": False, "message": str(e)}, 500
         audit_log(user, args["id"], args["product_id"], "host", "edit")
-        logger.info("point 3")
         return {"status": True, "message": ""}, 200
 
 
