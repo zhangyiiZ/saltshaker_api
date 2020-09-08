@@ -164,6 +164,7 @@ class UploadTarget(Resource):
                 target_dic = eval(target)
                 logger.info('3')
                 target_dic['host_id'] = host_id
+                logger.info(str(target_dic))
                 logger.info('循环内部：'+target_dic['target'])
                 logger.info('4')
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
