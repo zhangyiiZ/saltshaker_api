@@ -168,6 +168,7 @@ class TargetList(Resource):
             db.close_mysql()
             logger.error("Select target error: %s" % result)
             return {"status": False, "message": result}, 500
+        return {"status": True, "message": result}, 200
 
 # 上传文件
 class UploadTarget(Resource):
