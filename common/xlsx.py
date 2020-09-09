@@ -5,87 +5,72 @@ logger = loggers()
 
 
 class Xlsx():
-    def __init__(self, xlsx):
+    def __init__(self,xlsx):
         self.data = xlrd.open_workbook(xlsx)
-        logger.info("打开成功")
         self.sheet = self.data.sheet_by_index(0)
         self.l = []
-
-    def read(self):
+        self.la=[]
+    def read(self):  #读取excel放到列表里
         global l
+
         for i in range(self.sheet.nrows):
             if i == 0:
-                pass
+                self.la=self.sheet.row_values(i)
+                print(self.la)
             else:
-                self.l.append(self.sheet.row_values(i))
-        logger.info("读取信息成功")
-        return self.l
 
+                self.l.append(self.sheet.row_values(i))  #把第i行的数据放到列表第i个
+        return self.l
     def export(self):
         subdic = {}
         result = []
-        strresult = '['
+        strresult = "["
+        in_ip=""
+        for i in  range(len(self.la)):
 
+            if self.la[i]=="IP":
+                in_ip=i
+        if not in_ip:
+            return "没有找到IP这一列"
+
+        strresult2='[\n'
         if self.l:
             for i in self.l:
                 dic = {}
                 l2 = []
                 l2.append(i[3])
-                h3c = re.match(r'h3c', i[2], re.I)
-                hw = re.match(r'hw', i[2], re.I)
-                zte = re.match(r'zte', i[2], re.I)
-                if h3c:
-                    model = re.sub(h3c.group(0), '华三', i[2])
-                elif hw:
-                    model = re.sub(hw.group(0), '华为', i[2])
-                elif zte:
-                    model = re.sub(zte.group(0), '中兴', i[2])
-                else:
-                    model = i[2]
-                subdic["IP"] = i[3]
-                subdic["location"] = i[0]
-                subdic["model"] = model
-                subdic["type"] = i[1]
-                dic["targets"] = l2
-                dic["labels"] = subdic
-                # print(str(dic))
+                cont={}
+                for j in range(len(self.la)):
+                    cont[self.la[j]]=i[j]
+                resdic={"targets":[i[in_ip]],"labels":cont}
+                print(resdic)
                 if i != self.l[-1]:
-                    strresult = strresult + str(dic) + ',\n'
+                    strresult2 += " " + str(resdic) + ',\n'
                 else:
-                    strresult = strresult + str(dic) + ']'
-                result.append(dic)
-        strresult = strresult.replace("'", '"')
-        logger.info("返回结果值")
-        return strresult
-
+                    strresult2 += " " + str(resdic) + "\n]"
+        return strresult2.replace("'" ,'"')
     def export_db(self):
-        result = []
-        strresult = ''
+        in_ip=""
+        for i in  range(len(self.la)):
+
+            if self.la[i]=="IP":
+                in_ip=i
+        if not in_ip:
+            return "没有找到IP这一列"
+
+        strresult=''
         if self.l:
             for i in self.l:
                 dic = {}
                 l2 = []
                 l2.append(i[3])
-                h3c = re.match(r'h3c', i[2], re.I)
-                hw = re.match(r'hw', i[2], re.I)
-                zte = re.match(r'zte', i[2], re.I)
-                if h3c:
-                    model = re.sub(h3c.group(0), '华三', i[2])
-                elif hw:
-                    model = re.sub(hw.group(0), '华为', i[2])
-                elif zte:
-                    model = re.sub(zte.group(0), '中兴', i[2])
-                else:
-                    model = i[2]
-                dic['IP'] = i[3]
-                dic["location"] = i[0]
-                dic["model"] = model
-                dic["type"] = i[1]
-                dic["target"] = i[3]
+                cont={}
+                for j in range(len(self.la)):
+                    cont[self.la[j]]=i[j]
+                resdic={"targets":[i[in_ip]],"labels":cont}
+                print(resdic)
                 if i != self.l[-1]:
-                    strresult = strresult + str(dic) + ';\n'
+                    strresult += " " + str(resdic) + ';\n'
                 else:
-                    strresult = strresult + str(dic)
-                result.append(dic)
-        logger.info("返回结果值")
+                    strresult += " " + str(resdic)
         return strresult
