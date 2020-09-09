@@ -68,10 +68,10 @@ class Xlsx():
                 cont = {}
                 for j in range(len(self.la)):
                     cont[self.la[j]] = i[j]
-                resdic = {"targets": [i[in_ip]], "labels": cont}
-                print(resdic)
+                cont['target'] = i[in_ip]
+                print(cont)
                 if i != self.l[-1]:
-                    strresult += " " + str(resdic) + ';\n'
+                    strresult += str(cont) + ';\n'
                 else:
-                    strresult += " " + str(resdic)
-        return strresult.replace('[', '').replace(']', '')
+                    strresult += str(cont)
+        return strresult

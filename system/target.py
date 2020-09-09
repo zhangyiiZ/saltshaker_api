@@ -157,9 +157,12 @@ class UploadTarget(Resource):
             xlsx_file = Xlsx(os.path.join('/tmp', file.filename))
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
+            logger.info('config_db_result'+config_db_result)
             targets = config_db_result.split(';')
             for target in targets:
+                logger.info('111')
                 target_dic = eval(target)
+                logger.info("target_dic"+str(target_dic))
                 target_dic['host_id'] = host_id
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
