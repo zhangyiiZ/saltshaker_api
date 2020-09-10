@@ -208,10 +208,14 @@ class ConfigGenerate(Resource):
             return {"status": False, "message": '主机信息未知'}, 500
         host = result[0]
         product_id = host['product_id']
+        minion_id = host['minion_id']
+        state, result = db.select('product', "where data -> '$.id'='%s'" % product_id)
+        product = result[0]
+        master_id = product['salt_master_id']
         logger.info('product_id:'+product_id)
         salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
-        command = 'salt-cp ' + host_id + ' ' + file_name + ' ' + path_str
+        command = 'salt-cp ' + minion_id + ' ' + file_name + ' ' + path_str
         logger.info('command:'+command)
         #完成关键词搜索的文件的生成
         status, result = db.select("target", "where data -> '$.host_id'='%s'" % host_id)
@@ -220,7 +224,6 @@ class ConfigGenerate(Resource):
         else:
             db.close_mysql()
             return {"status": False, "message": result}, 500
-        logger.info('point1')
         strresult = '[\n'
         for target in target_list:
             model = str(target['model'])
@@ -228,11 +231,11 @@ class ConfigGenerate(Resource):
                 target_str = target.pop('target')
                 del target['host_id']
                 resdic = {"targets": [target_str], "labels": target}
-                logger.info(str(resdic))
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
         #结果文件存储，备份
         fo = open(path_str+file_name, "w")
+        logger.info('path:'+path_str+file_name)
         fo.write(strresult)
         fo.close()
         # 验证权限
@@ -242,5 +245,6 @@ class ConfigGenerate(Resource):
         acl_list = user_info["acl"]
         status = verify_acl(acl_list, command)
         if status["status"]:
-            result = salt_api.shell_remote_execution(host_id, command)
+            result = salt_api.shell_remote_execution(master_id, command)
+            logger.info('result:'+result)
             return {"status": True, "message": result}, 200
