@@ -206,7 +206,8 @@ class ConfigGenerate(Resource):
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         if state is False:
             return {"status": False, "message": '主机信息未知'}, 500
-        product_id = result['product_id']
+        host = result[0]
+        product_id = host['product_id']
         logger.info('product_id:'+product_id)
         #salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
