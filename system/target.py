@@ -203,7 +203,7 @@ class ConfigGenerate(Resource):
             file_name = file_name
         else:
             file_name = 'snmpconf_' + key_word + '.json'
-        state, result = db.select('host', "where data -> '$.host_id'='%s'" % host_id)
+        state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         if state is False:
             return {"status": False, "message": '主机信息未知'}, 500
         product_id = result['product_id']
