@@ -207,7 +207,8 @@ class ConfigGenerate(Resource):
         if state is False:
             return {"status": False, "message": '主机信息未知'}, 500
         product_id = result['product_id']
-        salt_api = salt_api_for_product(product_id)
+        logger.info('product_id:'+product_id)
+        #salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
         command = 'salt-cp ' + host_id + ' ' + file_name + ' ' + path_str
         logger.info('command:'+command)
