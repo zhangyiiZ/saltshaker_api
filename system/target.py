@@ -209,7 +209,7 @@ class ConfigGenerate(Resource):
         host = result[0]
         product_id = host['product_id']
         logger.info('product_id:'+product_id)
-        #salt_api = salt_api_for_product(product_id)
+        salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
         command = 'salt-cp ' + host_id + ' ' + file_name + ' ' + path_str
         logger.info('command:'+command)
@@ -231,8 +231,10 @@ class ConfigGenerate(Resource):
                 logger.info(str(resdic))
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
-        logger.info('strresult:'+strresult)
-        return {"status": True, "message": '?'}, 200
+        #结果文件存储，备份
+        fo = open(path_str+file_name, "w")
+        fo.write(strresult)
+        fo.close()
         # 验证权限
         user_info = g.user_info
         if isinstance(salt_api, dict):
@@ -241,3 +243,4 @@ class ConfigGenerate(Resource):
         status = verify_acl(acl_list, command)
         if status["status"]:
             result = salt_api.shell_remote_execution(host_id, command)
+            return {"status": True, "message": result}, 200
