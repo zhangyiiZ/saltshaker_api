@@ -24,9 +24,6 @@ class Xlsx():
         return self.l
 
     def export(self):
-        subdic = {}
-        result = []
-        strresult = "["
         in_ip = ""
         for i in range(len(self.la)):
 
@@ -34,7 +31,6 @@ class Xlsx():
                 in_ip = i
         if not in_ip:
             return "没有找到IP这一列"
-
         strresult2 = '[\n'
         if self.l:
             for i in self.l:

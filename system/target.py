@@ -6,12 +6,13 @@ from flask import g, app
 from common.log import loggers
 from common.audit_log import audit_log
 from common.db import DB
-from common.utility import uuid_prefix
+from common.utility import uuid_prefix, salt_api_for_product
 from common.sso import access_required
 import json
 
 from common.xlsx import Xlsx
 from fileserver.git_fs import gitlab_project
+from resources.execute import verify_acl
 from system.user import update_user_privilege, update_user_product
 from common.const import role_dict
 from fileserver.rsync_fs import rsync_config
@@ -30,6 +31,9 @@ parser.add_argument("type", type=str, default='', trim=True)
 parser.add_argument("project", type=str, default='', trim=True)
 parser.add_argument("client", type=str, default='', trim=True)
 parser.add_argument("pool", type=str, default='', trim=True)
+parser.add_argument("path", type=str, default='/usr/local/prometheus/conf.d/', trim=True)
+parser.add_argument("key_word", type=str, default='', trim=True)
+parser.add_argument("file_name", type=str, default='', trim=True)
 
 
 class Target(Resource):
@@ -143,6 +147,7 @@ class TargetList(Resource):
             return {"status": False, "message": result}, 500
         return {"status": True, "message": result}, 200
 
+
 # 上传文件
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
@@ -157,18 +162,14 @@ class UploadTarget(Resource):
             xlsx_file = Xlsx(os.path.join('/tmp', file.filename))
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
-            logger.info('config_db_result'+config_db_result)
             targets = config_db_result.split(';')
             for target in targets:
-                logger.info('111')
                 target_dic = eval(target)
-                logger.info("target_dic"+str(target_dic))
                 target_dic['host_id'] = host_id
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
-                        logger.info('5')
-                        insert_status, insert_result = db.insert("target",json.dumps(target_dic, ensure_ascii=False) )
+                        insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                         if insert_status is not True:
                             return {"status": False, "message": insert_result}, 500
                     else:
@@ -182,8 +183,59 @@ class UploadTarget(Resource):
             db.close_mysql()
 
 
-
-
-
-
-
+class ConfigGenerate(Resource):
+    @access_required(role_dict["common_user"])
+    def post(self):
+        logger.info("ConfigGenerate")
+        db = DB()
+        # 首先取得所有所需配置参数，并做处理
+        args = parser.parse_args()
+        host_id = args['host_id']
+        key_word = args['key_word']
+        path = args['path']
+        file_name = args['file_name']
+        path_str = str(path)
+        if path_str.endswith('/'):
+            path_str = path_str
+        else:
+            path_str = path_str + '/'
+        if file_name:
+            file_name = file_name
+        else:
+            file_name = 'snmpconf_' + key_word + '.json'
+        state, result = db.select('host', "where data -> '$.host_id'='%s'" % host_id)
+        if state is False:
+            return {"status": False, "message": '主机信息未知'}, 500
+        product_id = result['product_id']
+        salt_api = salt_api_for_product(product_id)
+        # 完成命令拼装
+        command = 'salt-cp ' + host_id + ' ' + file_name + ' ' + path_str
+        logger.info('command:'+command)
+        #完成关键词搜索的文件的生成
+        status, result = db.select("target", "where data -> '$.host_id'='%s'" % host_id)
+        if status is True:
+            target_list = result
+        else:
+            db.close_mysql()
+            return {"status": False, "message": result}, 500
+        logger.info('point1')
+        strresult = '[\n'
+        for target in target_list:
+            model = str(target['model'])
+            if model.__contains__(key_word):
+                target_str = target.pop('target')
+                del target['host_id']
+                resdic = {"targets": [target_str], "labels": target}
+                logger.info(str(resdic))
+                strresult += " " + str(resdic) + ',\n'
+        strresult = strresult[:-1] + '\n]'
+        logger.info('strresult:'+strresult)
+        return {"status": True, "message": '?'}, 200
+        # 验证权限
+        user_info = g.user_info
+        if isinstance(salt_api, dict):
+            return salt_api, 500
+        acl_list = user_info["acl"]
+        status = verify_acl(acl_list, command)
+        if status["status"]:
+            result = salt_api.shell_remote_execution(host_id, command)
