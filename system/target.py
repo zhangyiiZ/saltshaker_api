@@ -216,7 +216,7 @@ class ConfigGenerate(Resource):
         logger.info('product_id:' + product_id)
         salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
-        source = 'tmp/config/' + minion_id + '/' + file_name
+        source = '/tmp/config/' + minion_id + '/' + file_name
         dest = path_str
         command = 'salt-cp ' + minion_id + ' ' + source + ' ' + dest
         logger.info('command:' + command)
@@ -258,9 +258,6 @@ class ConfigGenerate(Resource):
             except Exception as e:
                 return {"status": False, "message": str(e)}, 500
             # 验证权限,执行发送功能
-        logger.info('ssss')
         command = 'cd /tmp/config \n git pull \n' + command
-        logger.info('ssss'+command)
-        logger.info('master id:'+master_id)
         result = salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
