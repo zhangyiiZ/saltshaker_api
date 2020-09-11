@@ -259,9 +259,8 @@ class ConfigGenerate(Resource):
                 return {"status": False, "message": str(e)}, 500
             # 验证权限,执行发送功能
         logger.info('ssss')
-        #command = 'cd /tmp/config \n git pull \n' + command
+        command = 'cd /tmp/config \n git pull \n' + command
         logger.info('ssss'+command)
         logger.info('master id:'+master_id)
-        result = salt_api.shell_remote_execution(master_id, 'cd /tmp/config')
-        logger.info('result:' + result)
-        return {"status": True, "message": result}, 200
+        result = salt_api.shell_remote_execution(master_id, command)
+        return {"status": True, "message": '配置发送成功'}, 200
