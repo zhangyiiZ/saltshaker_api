@@ -11,7 +11,7 @@ RUN set -xe \
     && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtimeDockerfile
 
 CMD cd /data0/saltshaker_api/ && \
-sed -i "s/\(MYSQL_HOST = \).*/\1${MYSQL_HOST}/g" ${S} &  & \
+sed -i "s/\(MYSQL_HOST = \).*/\1${MYSQL_HOST}/g" ${S} && \
 sed -i "s/\(MYSQL_PORT = \).*/\1${MYSQL_PORT}/g" ${S} && \
 sed -i "s/\(MYSQL_USER = \).*/\1${MYSQL_USER}/g" ${S} && \
 sed -i "s/\(MYSQL_PASSWORD = \).*/\1${MYSQL_PASSWORD}/g" ${S} && \
