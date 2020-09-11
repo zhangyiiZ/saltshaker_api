@@ -242,7 +242,6 @@ class ConfigGenerate(Resource):
         #上传文件到gitlab中
         logger.info('222222')
         project, _ = gitlab_project('p-11992012f3fa11ea96120242ac120002', 'state_project')
-        logger.info('project:'+project)
         # 支持的action create, delete, move, update
         data = {
             'branch': product_name,
@@ -256,14 +255,11 @@ class ConfigGenerate(Resource):
             ]
         }
         if isinstance(project, dict):
-            logger.info('www')
             return project, 500
         else:
             try:
-                logger.info('11111')
                 project.commits.create(data)
             except Exception as e:
-                logger.error("Upload222 file: %s" % e)
                 return {"status": False, "message": str(e)}, 500
             return {"status": True, "message": ""}, 200
         # 验证权限
