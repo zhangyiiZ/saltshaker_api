@@ -31,6 +31,7 @@ class ExecuteShell(Resource):
                     "message": "The specified command parameter does not exist"}, 400
         minion_id = args["minion_id"]
         salt_api = salt_api_for_product(args["product_id"])
+        logger.info('product shell:'+args["product_id"])
         user_info = g.user_info
         if isinstance(salt_api, dict):
             return salt_api, 500
@@ -39,6 +40,7 @@ class ExecuteShell(Resource):
         status = verify_acl(acl_list, command)
         # acl deny 验证完成后执行命令
         if status["status"]:
+            logger.info(minion_id)
             result = salt_api.shell_remote_execution(minion_id, command)
             # 记录历史命令
             db = DB()

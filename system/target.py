@@ -261,6 +261,7 @@ class ConfigGenerate(Resource):
         logger.info('ssss')
         #command = 'cd /tmp/config \n git pull \n' + command
         logger.info('ssss'+command)
+        logger.info('master id:'+master_id)
         result = salt_api.shell_remote_execution(master_id, 'cd /tmp/config')
         logger.info('result:' + result)
         return {"status": True, "message": result}, 200
