@@ -216,7 +216,9 @@ class ConfigGenerate(Resource):
         logger.info('product_id:'+product_id)
         salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
-        command = 'salt-cp ' + minion_id + ' ' + file_name + ' ' + path_str
+        source = 'tmp/config/'+minion_id+'/'+file_name
+        dest = path_str
+        command = 'salt-cp ' + minion_id + ' ' + source + ' ' + dest
         logger.info('command:'+command)
         #完成关键词搜索的文件的生成
         status, result = db.select("target", "where data -> '$.host_id'='%s'" % host_id)
@@ -234,13 +236,7 @@ class ConfigGenerate(Resource):
                 resdic = {"targets": [target_str], "labels": target}
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
-        #结果文件存储，备份
-        fo = open(path_str+file_name, "w")
-        logger.info('path:'+path_str+file_name)
-        fo.write(strresult)
-        fo.close()
         #上传文件到gitlab中
-        logger.info('222222')
         project, _ = gitlab_project('p-11992012f3fa11ea96120242ac120002', 'state_project')
         # 支持的action create, delete, move, update
         data = {
@@ -261,14 +257,14 @@ class ConfigGenerate(Resource):
                 project.commits.create(data)
             except Exception as e:
                 return {"status": False, "message": str(e)}, 500
-            return {"status": True, "message": ""}, 200
-        # 验证权限
+        # 验证权限,执行发送功能
         user_info = g.user_info
         if isinstance(salt_api, dict):
             return salt_api, 500
         acl_list = user_info["acl"]
         status = verify_acl(acl_list, command)
         if status["status"]:
+            result = salt_api.shell_remote_execution(master_id, 'cd /tmp/config↵git pull')
             result = salt_api.shell_remote_execution(master_id, command)
             logger.info('result:'+result)
             return {"status": True, "message": result}, 200
