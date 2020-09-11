@@ -264,7 +264,8 @@ class ConfigGenerate(Resource):
         acl_list = user_info["acl"]
         status = verify_acl(acl_list, command)
         if status["status"]:
-            result = salt_api.shell_remote_execution(master_id, 'cd /tmp/config↵git pull')
+            result = salt_api.shell_remote_execution(master_id, 'cd /tmp/config')
+            result = salt_api.shell_remote_execution(master_id, 'git pull')
             result = salt_api.shell_remote_execution(master_id, command)
             logger.info('result:'+result)
             return {"status": True, "message": result}, 200

@@ -25,6 +25,7 @@ class ExecuteShell(Resource):
     def post(self):
         args = parser.parse_args()
         command = args["command"]
+        logger.info('command shell:'+command)
         if not command:
             return {"status": False,
                     "message": "The specified command parameter does not exist"}, 400
