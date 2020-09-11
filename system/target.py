@@ -213,14 +213,14 @@ class ConfigGenerate(Resource):
         product = result[0]
         product_name = product['name']
         master_id = product['salt_master_id']
-        logger.info('product_id:'+product_id)
+        logger.info('product_id:' + product_id)
         salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
-        source = 'tmp/config/'+minion_id+'/'+file_name
+        source = 'tmp/config/' + minion_id + '/' + file_name
         dest = path_str
         command = 'salt-cp ' + minion_id + ' ' + source + ' ' + dest
-        logger.info('command:'+command)
-        #完成关键词搜索的文件的生成
+        logger.info('command:' + command)
+        # 完成关键词搜索的文件的生成
         status, result = db.select("target", "where data -> '$.host_id'='%s'" % host_id)
         if status is True:
             target_list = result
@@ -236,16 +236,16 @@ class ConfigGenerate(Resource):
                 resdic = {"targets": [target_str], "labels": target}
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
-        #上传文件到gitlab中
+        # 上传文件到gitlab中
         project, _ = gitlab_project('p-11992012f3fa11ea96120242ac120002', 'state_project')
         # 支持的action create, delete, move, update
         data = {
             'branch': product_name,
-            'commit_message': command ,
+            'commit_message': command,
             'actions': [
                 {
                     'action': 'create',
-                    'file_path': minion_id+'/'+file_name,
+                    'file_path': minion_id + '/' + file_name,
                     'content': strresult
                 }
             ]
@@ -257,14 +257,9 @@ class ConfigGenerate(Resource):
                 project.commits.create(data)
             except Exception as e:
                 return {"status": False, "message": str(e)}, 500
-        # 验证权限,执行发送功能
-        user_info = g.user_info
-        if isinstance(salt_api, dict):
-            return salt_api, 500
-        acl_list = user_info["acl"]
-        status = verify_acl(acl_list, command)
-        if status["status"]:
-            result = salt_api.shell_remote_execution(master_id, 'cd /tmp/config /n git pull')
-            result = salt_api.shell_remote_execution(master_id, command)
-            logger.info('result:'+result)
-            return {"status": True, "message": result}, 200
+            # 验证权限,执行发送功能
+        logger.info('ssss')
+        command = 'cd /tmp/config /n git pull /n' + command
+        result = salt_api.shell_remote_execution(master_id, command)
+        logger.info('result:' + result)
+        return {"status": True, "message": result}, 200
