@@ -240,7 +240,9 @@ class ConfigGenerate(Resource):
         fo.write(strresult)
         fo.close()
         #上传文件到gitlab中
+        logger.info('222222')
         project, _ = gitlab_project('11992012f3fa11ea96120242ac120002', 'state_project')
+        logger.info('project:'+project)
         # 支持的action create, delete, move, update
         data = {
             'branch': product_name,

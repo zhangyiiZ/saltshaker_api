@@ -152,6 +152,8 @@ class Upload(Resource):
         args = parser.parse_args()
         user = g.user_info["username"]
         project, _ = gitlab_project(args["product_id"], args["project_type"])
+        logger.info('prodjectgit:'+str(project))
+        logger.info('prodjectgit:' + project)
         file = request.files['file']
         logger.info("firename:"+file.filename+"product_id:"+args["product_id"]+"project_type:"+args["project_type"]+"branch:"+args["branch"]+"path:"+args["path"])
         if args["path"]:
