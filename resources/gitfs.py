@@ -159,7 +159,6 @@ class Upload(Resource):
         content = file.read()
         try:
             content_decode = content.decode()
-            logger.info("上传文件："+content_decode)
             actions = [
                 {
                     'action': 'create',
@@ -169,18 +168,6 @@ class Upload(Resource):
             ]
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
-        # try:
-        #     content_decode = content.decode()
-        #     actions = [
-        #         {
-        #             'action': args["action"],
-        #             'file_path': file_path,
-        #             'content': base64.b64encode(content_decode),
-        #             'encoding': 'base64',
-        #         }
-        #     ]
-        # except Exception as e:
-        #     print(e)
         data = {
             'branch': args["branch"],
             'commit_message': args["action"] + " " + args["path"],

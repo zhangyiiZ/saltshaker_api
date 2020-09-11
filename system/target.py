@@ -211,6 +211,7 @@ class ConfigGenerate(Resource):
         minion_id = host['minion_id']
         state, result = db.select('product', "where data -> '$.id'='%s'" % product_id)
         product = result[0]
+        product_name = product['name']
         master_id = product['salt_master_id']
         logger.info('product_id:'+product_id)
         salt_api = salt_api_for_product(product_id)
@@ -238,6 +239,31 @@ class ConfigGenerate(Resource):
         logger.info('path:'+path_str+file_name)
         fo.write(strresult)
         fo.close()
+        #上传文件到gitlab中
+        project, _ = gitlab_project('11992012f3fa11ea96120242ac120002', 'state_project')
+        # 支持的action create, delete, move, update
+        data = {
+            'branch': product_name,
+            'commit_message': command ,
+            'actions': [
+                {
+                    'action': 'create',
+                    'file_path': minion_id+'/'+file_name,
+                    'content': strresult
+                }
+            ]
+        }
+        if isinstance(project, dict):
+            logger.info('www')
+            return project, 500
+        else:
+            try:
+                logger.info('11111')
+                project.commits.create(data)
+            except Exception as e:
+                logger.error("Upload222 file: %s" % e)
+                return {"status": False, "message": str(e)}, 500
+            return {"status": True, "message": ""}, 200
         # 验证权限
         user_info = g.user_info
         if isinstance(salt_api, dict):
