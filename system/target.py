@@ -31,7 +31,7 @@ parser.add_argument("type", type=str, default='', trim=True)
 parser.add_argument("project", type=str, default='', trim=True)
 parser.add_argument("client", type=str, default='', trim=True)
 parser.add_argument("pool", type=str, default='', trim=True)
-parser.add_argument("path", type=str, default='/usr/local/prometheus/conf.d/', trim=True)
+parser.add_argument("path", type=str, default='', trim=True)
 parser.add_argument("key_word", type=str, default='', trim=True)
 parser.add_argument("file_name", type=str, default='', trim=True)
 
@@ -195,10 +195,13 @@ class ConfigGenerate(Resource):
         path = args['path']
         file_name = args['file_name']
         path_str = str(path)
-        if path_str.endswith('/'):
-            path_str = path_str
+        if path_str:
+            if path_str.endswith('/'):
+                path_str = path_str
+            else:
+                path_str = path_str + '/'
         else:
-            path_str = path_str + '/'
+            path_str = '/usr/local/prometheus/conf.d/'
         if file_name:
             file_name = file_name
         else:
@@ -213,13 +216,11 @@ class ConfigGenerate(Resource):
         product = result[0]
         product_name = product['name']
         master_id = product['salt_master_id']
-        logger.info('product_id:' + product_id)
         salt_api = salt_api_for_product(product_id)
         # 完成命令拼装
         source = '/tmp/config/' + minion_id + '/' + file_name
         dest = path_str
         command = 'salt-cp ' + minion_id + ' ' + source + ' ' + dest
-        logger.info('command:' + command)
         # 完成关键词搜索的文件的生成
         status, result = db.select("target", "where data -> '$.host_id'='%s'" % host_id)
         if status is True:
@@ -260,4 +261,23 @@ class ConfigGenerate(Resource):
             # 验证权限,执行发送功能
         command = 'cd /tmp/config \n git pull \n' + command
         result = salt_api.shell_remote_execution(master_id, command)
+        return {"status": True, "message": '配置发送成功'}, 200
+
+class PingList(Resource):
+    @access_required(role_dict["common_user"])
+    def post(self):
+        logger.info("PingList")
+        args = parser.parse_args()
+        db = DB()
+        host_id = args['host_id']
+        state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
+        minion_id = result[0]['minion_id']
+        logger.info('minion_id:'+minion_id)
+        product_id = result[0]['product_id']
+        salt_api = salt_api_for_product(product_id)
+        state, targets = db.select('target', "where data -> '$.host_id'='%s'" % host_id)
+        for target in targets:
+            command = 'ping' + target["IP"]
+            logger.info('command:'+command)
+            result = salt_api.shell_remote_execution(minion_id,command)
         return {"status": True, "message": '配置发送成功'}, 200
