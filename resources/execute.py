@@ -40,6 +40,7 @@ class ExecuteShell(Resource):
         # acl deny 验证完成后执行命令
         if status["status"]:
             result = salt_api.shell_remote_execution(minion_id, command)
+            logger.info("result:"+str(result))
             # 记录历史命令
             db = DB()
             cmd_history = {

@@ -263,6 +263,7 @@ class ConfigGenerate(Resource):
         result = salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
 
+
 class PingList(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
@@ -272,12 +273,14 @@ class PingList(Resource):
         host_id = args['host_id']
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         minion_id = result[0]['minion_id']
-        logger.info('minion_id:'+minion_id)
+        logger.info('minion_id:' + minion_id)
         product_id = result[0]['product_id']
         salt_api = salt_api_for_product(product_id)
         state, targets = db.select('target', "where data -> '$.host_id'='%s'" % host_id)
         targets_not = []
         for target in targets:
-            if str(target['IP']).__contains__('198'):
+            command = 'cat /home/111'
+            result = salt_api.shell_remote_execution(minion_id, command)
+            if str(result).__contains__('Timeout'):
                 targets_not.append(target)
-        return {"status": True, "message": '配置发送成功',"data":targets_not}, 200
+        return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
