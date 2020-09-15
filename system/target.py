@@ -276,8 +276,8 @@ class PingList(Resource):
         product_id = result[0]['product_id']
         salt_api = salt_api_for_product(product_id)
         state, targets = db.select('target', "where data -> '$.host_id'='%s'" % host_id)
+        targets_not = []
         for target in targets:
-            command = 'ping' + target["IP"]
-            logger.info('command:'+command)
-            result = salt_api.shell_remote_execution(minion_id,command)
-        return {"status": True, "message": '配置发送成功'}, 200
+            if str(target['IP']).__contains__('198'):
+                targets_not.append(target)
+        return {"status": True, "message": '配置发送成功',"data":targets_not}, 200
