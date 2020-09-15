@@ -26,7 +26,6 @@ from period.period_task import *
 from common.utility import custom_abort
 from resources.sls import SLSCreate
 
-
 api = flask_restful.Api(catch_all_404s=True)
 
 # 重新定义flask restful 400错误
@@ -137,9 +136,9 @@ api.add_resource(ServiceStatus, "/saltshaker/api/v1.0/dashboard/status")
 # sls
 api.add_resource(SLSCreate, "/saltshaker/api/v1.0/sls/create")
 
-#monitor
+# monitor
 api.add_resource(TargetList, "/saltshaker/api/v1.0/target")
 api.add_resource(Target, "/saltshaker/api/v1.0/target/<string:target_id>")
 api.add_resource(UploadTarget, "/saltshaker/api/v1.0/target/upload")
 api.add_resource(ConfigGenerate, "/saltshaker/api/v1.0/target/config")
-api.add_resource(PingList,"/saltshaker/api/v1.0/target/ping")
+api.add_resource(PingList, "/saltshaker/api/v1.0/target/ping/<string:host_id>")

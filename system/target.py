@@ -265,11 +265,10 @@ class ConfigGenerate(Resource):
 
 class PingList(Resource):
     @access_required(role_dict["common_user"])
-    def post(self):
+    def get(self):
         logger.info("PingList")
-        args = parser.parse_args()
+        host_id = request.args.get("host_id")
         db = DB()
-        host_id = args['host_id']
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         minion_id = result[0]['minion_id']
         logger.info('minion_id:'+minion_id)
