@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import os
+from concurrent.futures.thread import ThreadPoolExecutor
 
 from flask_restful import Resource, reqparse, request
 from flask import g, app
@@ -278,9 +279,22 @@ class PingList(Resource):
         salt_api = salt_api_for_product(product_id)
         state, targets = db.select('target', "where data -> '$.host_id'='%s'" % host_id)
         targets_not = []
+        thread_pool = ThreadPoolExecutor(max_workers=10, thread_name_prefix="target_")
+        futures = []
         for target in targets:
-            command = 'cat /home/111'
-            result = salt_api.shell_remote_execution(minion_id, command)
-            if str(result).__contains__('Timeout'):
-                targets_not.append(target)
+            future = thread_pool.submit(pingTarget, target, minion_id, salt_api)
+            futures.append(future)
+        thread_pool.shutdown(wait=True)
+        for future in futures:
+            result = future.result()
+            if str(result["command"]).__contains__('Timeout'):
+                targets_not.append(result["target"])
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
+
+
+def pingTarget(target, minion_id, salt_api):
+    command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
+    logger.info(command)
+    #result = {'target': target, 'command': salt_api.shell_remote_execution(minion_id, command)}
+    result = {'target': target, 'command': target["pool"]}
+    return result
