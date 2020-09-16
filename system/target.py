@@ -126,9 +126,10 @@ class TargetList(Resource):
         user_id = g.user_info["id"]
         target = args
         db = DB()
+        host_id = args['host_id']
         status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
         if status is True:
-            if len(result) == 0:
+            if (len(result) == 0)|(result[0]['host_id']!=host_id) :
                 # 给用户添加产品线
                 info = update_user_product(user_id, args["id"])
                 if info["status"] is False:
