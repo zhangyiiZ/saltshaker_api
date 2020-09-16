@@ -299,3 +299,11 @@ def pingTarget(target, minion_id, salt_api):
     #result = {'target': target, 'command': salt_api.shell_remote_execution(minion_id, command)}
     result = {'target': target, 'command': target["type"]}
     return result
+
+class SinglePing(Resource):
+    @access_required(role_dict["common_user"])
+    def post(self):
+        logger.info("SinglePing")
+        result = {"iZ2zeeo5zrefm79y5v4n7uZ": "111"}
+        return {"status":True,"message":'',"data":result}
+

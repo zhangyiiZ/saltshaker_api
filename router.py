@@ -5,7 +5,7 @@ from resources.job import Job, JobList, JobManager
 from resources.event import Event, EventList
 from system.product import ProductList, Product, ProductCheck
 from system.role import RoleList, Role
-from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList
+from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList, SinglePing
 from system.user import UserList, User, Register, ResetPassword, ResetPasswordByOwner, ChangeUserInfo
 from system.login import Login
 from system.acl import ACLList, ACL
@@ -142,3 +142,4 @@ api.add_resource(Target, "/saltshaker/api/v1.0/target/<string:target_id>")
 api.add_resource(UploadTarget, "/saltshaker/api/v1.0/target/upload")
 api.add_resource(ConfigGenerate, "/saltshaker/api/v1.0/target/config")
 api.add_resource(PingList, "/saltshaker/api/v1.0/target/ping")
+api.add_resource(SinglePing, "/saltshaker/api/v1.0/target/single")
