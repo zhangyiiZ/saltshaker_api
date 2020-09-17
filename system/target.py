@@ -174,6 +174,7 @@ class UploadTarget(Resource):
                 target_dic = eval(target)
                 target_dic['host_id'] = host_id
                 target_dic['id'] = uuid_prefix('t')
+                logger.info(str(target_dic))
                 insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                 if insert_status is not True:
                     logger.error("error:"+insert_result)
