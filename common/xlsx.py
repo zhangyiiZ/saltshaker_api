@@ -66,8 +66,5 @@ class Xlsx():
                     cont[self.la[j]] = i[j]
                 cont['target'] = i[in_ip]
                 print(cont)
-                if i != self.l[-1]:
-                    strresult += str(cont) + ';\n'
-                else:
-                    strresult += str(cont)
+                strresult += str(cont) + ';\n'
         return strresult

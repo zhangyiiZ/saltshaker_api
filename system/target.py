@@ -170,8 +170,8 @@ class UploadTarget(Resource):
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
-            for target in targets:
-                target_dic = eval(target)
+            for i in range(0,len(targets)-1):
+                target_dic = eval(targets[i])
                 target_dic['host_id'] = host_id
                 target_dic['id'] = uuid_prefix('t')
                 logger.info(str(target_dic))
