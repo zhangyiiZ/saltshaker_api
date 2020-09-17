@@ -76,6 +76,7 @@ class Target(Resource):
         args = parser.parse_args()
         logger.info(args['host_id'])
         args["id"] = target_id
+        logger.info('id:' + target_id)
         target = args
         db = DB()
         # 判断是否存在
@@ -121,15 +122,17 @@ class TargetList(Resource):
     @access_required(role_dict["product"])
     def post(self):
         args = parser.parse_args()
-        args["id"] = uuid_prefix("p")
+        args["id"] = uuid_prefix("t")
         user = g.user_info["username"]
         user_id = g.user_info["id"]
         target = args
         db = DB()
         host_id = args['host_id']
         status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
+        logger.info('sss:'+str(result))
         if status is True:
-            if (len(result) == 0)|(result[0]['host_id']!=host_id) :
+            logger.info("boolen:"+str(result[0]['host_id'] != host_id))
+            if (len(result) == 0) | (result[0]['host_id'] != host_id):
                 # 给用户添加产品线
                 info = update_user_product(user_id, args["id"])
                 if info["status"] is False:
@@ -296,14 +299,14 @@ class PingList(Resource):
 def pingTarget(target, minion_id, salt_api):
     command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
     logger.info(command)
-    #result = {'target': target, 'command': salt_api.shell_remote_execution(minion_id, command)}
+    # result = {'target': target, 'command': salt_api.shell_remote_execution(minion_id, command)}
     result = {'target': target, 'command': target["type"]}
     return result
+
 
 class SinglePing(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
         logger.info("SinglePing")
         result = {"iZ2zeeo5zrefm79y5v4n7uZ": "111"}
-        return {"status":True,"message":'',"data":result}
-
+        return {"status": True, "message": '', "data": result}
