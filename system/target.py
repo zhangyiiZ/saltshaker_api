@@ -149,6 +149,7 @@ class TargetList(Resource):
         db.close_mysql()
         return {"status": True, "message": result}, 200
 
+
 # 上传文件
 class UploadTarget(Resource):
     @access_required(role_dict["common_user"])
@@ -167,15 +168,15 @@ class UploadTarget(Resource):
             for target in targets:
                 target_dic = eval(target)
                 target_dic['host_id'] = host_id
-                target_dic['id']=uuid_prefix('t')
+                target_dic['id'] = uuid_prefix('t')
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
-                        insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+                        insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                         if insert_status is not True:
                             return {"status": False, "message": insert_result}, 500
                     elif result[0]['host_id'] != host_id:
-                        insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+                        insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                         if insert_status is not True:
                             return {"status": False, "message": insert_result}, 500
                     else:
