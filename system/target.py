@@ -123,33 +123,32 @@ class TargetList(Resource):
     def post(self):
         args = parser.parse_args()
         args["id"] = uuid_prefix("t")
-        user = g.user_info["username"]
-        user_id = g.user_info["id"]
         target = args
         db = DB()
         host_id = args['host_id']
         status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
-        logger.info('sss:'+str(result))
+        logger.info('sss:' + str(result))
         if status is True:
-            logger.info("boolen:"+str(result[0]['host_id'] != host_id))
-            if (len(result) == 0) | (result[0]['host_id'] != host_id):
-                # 给用户添加产品线
-                info = update_user_product(user_id, args["id"])
-                if info["status"] is False:
-                    return {"status": False, "message": info["message"]}, 500
+            if (len(result) == 0):
                 insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-                db.close_mysql()
                 if insert_status is not True:
                     logger.error("Add target error: %s" % insert_result)
+                    db.close_mysql()
                     return {"status": False, "message": insert_result}, 500
-                audit_log(user, args["id"], "", "target", "add")
+            elif result[0]['host_id'] != host_id:
+                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+                if insert_status is not True:
+                    logger.error("Add target error: %s" % insert_result)
+                    db.close_mysql()
+                    return {"status": False, "message": insert_result}, 500
             else:
                 db.close_mysql()
-                return {"status": False, "message": "The target already exists"}, 200
+                return {"status": False, "message": "target already exists"}, 500
         else:
             db.close_mysql()
             logger.error("Select target error: %s" % result)
             return {"status": False, "message": result}, 500
+        db.close_mysql()
         return {"status": True, "message": result}, 200
 
 
