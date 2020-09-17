@@ -126,28 +126,33 @@ class TargetList(Resource):
         target = args
         db = DB()
         host_id = args['host_id']
-        status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
-        if status is True:
-            if (len(result) == 0):
-                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-                if insert_status is not True:
-                    logger.error("Add target error: %s" % insert_result)
-                    db.close_mysql()
-                    return {"status": False, "message": insert_result}, 500
-            elif result[0]['host_id'] != host_id:
-                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-                if insert_status is not True:
-                    logger.error("Add target error: %s" % insert_result)
-                    db.close_mysql()
-                    return {"status": False, "message": insert_result}, 500
-            else:
-                db.close_mysql()
-                return {"status": False, "message": "target already exists"}, 500
-        else:
+        insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+        if insert_status is not True:
             db.close_mysql()
-            return {"status": False, "message": result}, 500
-        db.close_mysql()
-        return {"status": True, "message": result}, 200
+            return {"status": False, "message": insert_result}, 500
+        return {"status": True, "message": insert_result}, 200
+        # status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
+        # if status is True:
+        #     if (len(result) == 0):
+        #         insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+        #         if insert_status is not True:
+        #             logger.error("Add target error: %s" % insert_result)
+        #             db.close_mysql()
+        #             return {"status": False, "message": insert_result}, 500
+        #     elif result[0]['host_id'] != host_id:
+        #         insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+        #         if insert_status is not True:
+        #             logger.error("Add target error: %s" % insert_result)
+        #             db.close_mysql()
+        #             return {"status": False, "message": insert_result}, 500
+        #     else:
+        #         db.close_mysql()
+        #         return {"status": False, "message": "target already exists"}, 500
+        # else:
+        #     db.close_mysql()
+        #     return {"status": False, "message": result}, 500
+        # db.close_mysql()
+        # return {"status": True, "message": result}, 200
 
 
 # 上传文件
@@ -169,20 +174,9 @@ class UploadTarget(Resource):
                 target_dic = eval(target)
                 target_dic['host_id'] = host_id
                 target_dic['id'] = uuid_prefix('t')
-                status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
-                if status is True:
-                    if len(result) == 0:
-                        insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
-                        if insert_status is not True:
-                            return {"status": False, "message": insert_result}, 500
-                    elif result[0]['host_id'] != host_id:
-                        insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
-                        if insert_status is not True:
-                            return {"status": False, "message": insert_result}, 500
-                    else:
-                        return {"status": False, "message": "target already exists"}, 500
-                else:
-                    return {"status": False, "message": result}, 500
+                insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
+                if insert_status is not True:
+                    return {"status": False, "message": insert_result}, 500
             return {"status": True, "message": ""}, 200
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
