@@ -127,7 +127,6 @@ class TargetList(Resource):
         db = DB()
         host_id = args['host_id']
         status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
-        logger.info('sss:' + str(result))
         if status is True:
             if (len(result) == 0):
                 insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
@@ -146,11 +145,9 @@ class TargetList(Resource):
                 return {"status": False, "message": "target already exists"}, 500
         else:
             db.close_mysql()
-            logger.error("Select target error: %s" % result)
             return {"status": False, "message": result}, 500
         db.close_mysql()
         return {"status": True, "message": result}, 200
-
 
 # 上传文件
 class UploadTarget(Resource):
@@ -170,20 +167,26 @@ class UploadTarget(Resource):
             for target in targets:
                 target_dic = eval(target)
                 target_dic['host_id'] = host_id
+                target_dic['id']=uuid_prefix('t')
                 status, result = db.select("target", "where data -> '$.target'='%s'" % target_dic['target'])
                 if status is True:
                     if len(result) == 0:
-                        insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
+                        insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+                        if insert_status is not True:
+                            return {"status": False, "message": insert_result}, 500
+                    elif result[0]['host_id'] != host_id:
+                        insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
                         if insert_status is not True:
                             return {"status": False, "message": insert_result}, 500
                     else:
-                        return {"status": False, "message": "The target already exists"}, 200
+                        return {"status": False, "message": "target already exists"}, 500
                 else:
                     return {"status": False, "message": result}, 500
             return {"status": True, "message": ""}, 200
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
         finally:
+            logger.info("close db")
             db.close_mysql()
 
 
