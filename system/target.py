@@ -24,6 +24,7 @@ logger = loggers()
 
 parser = reqparse.RequestParser()
 parser.add_argument("host_id", type=str, required=True, trim=True)
+parser.add_argument("target_id", type=str, default='', trim=True)
 parser.add_argument("target", type=str, default='', trim=True)
 parser.add_argument("IP", type=str, default='', trim=True)
 parser.add_argument("location", type=str, default='', trim=True)
@@ -307,5 +308,24 @@ class SinglePing(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
         logger.info("SinglePing")
-        result = {"iZ2zeeo5zrefm79y5v4n7uZ": "111","command":'sss'}
-        return {"status": True, "message": '', "data": result}
+        args = parser.parse_args()
+        host_id = args['host_id']
+        target_id = args['target_id']
+        result = {}
+
+        db = DB()
+        state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
+        minion_id = result[0]['minion_id']
+        product_id = result[0]['product_id']
+        salt_api = salt_api_for_product(product_id)
+
+        state, result = db.select('target', "where data -> '$.id'='%s'" % target_id)
+        target_ip = result[0]['IP']
+
+        command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
+        #sys_descr = salt_api.shell_remote_execution(minion_id, command)
+
+        result['status'] = command
+        result['sysDescr'] = 'wait'
+
+        return {"status": True, "message": '成功', "data": result}
