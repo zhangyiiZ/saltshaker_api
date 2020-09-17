@@ -176,6 +176,7 @@ class UploadTarget(Resource):
                 target_dic['id'] = uuid_prefix('t')
                 insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                 if insert_status is not True:
+                    logger.error("error:"+insert_result)
                     return {"status": False, "message": insert_result}, 500
             return {"status": True, "message": ""}, 200
         except Exception as e:
