@@ -290,7 +290,7 @@ class PingList(Resource):
         thread_pool.shutdown(wait=True)
         for future in futures:
             result = future.result()
-            if str(result["command"]).__contains__('接入'):
+            if str(result["command"]).__contains__('外网'):
                 targets_not.append(result["target"])
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
 
