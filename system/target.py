@@ -307,5 +307,5 @@ class SinglePing(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
         logger.info("SinglePing")
-        result = {"iZ2zeeo5zrefm79y5v4n7uZ": "111"}
+        result = {"iZ2zeeo5zrefm79y5v4n7uZ": "111","command":'sss'}
         return {"status": True, "message": '', "data": result}
