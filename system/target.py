@@ -299,7 +299,7 @@ class PingList(Resource):
 def pingTarget(target, minion_id, salt_api):
     command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
     logger.info(command)
-    # result = {'target': target, 'status': salt_api.shell_remote_execution(minion_id, command)}
+    # result = {'target': target, 'status': salt_api.shell_remote_execution([minion_id], command)}
     result = {'target': target, 'status': target["type"]}
     return result
 
@@ -314,20 +314,18 @@ class SinglePing(Resource):
         #获得所需参数minion_id、product_id、target_ip
         db = DB()
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
-        minion_id = [result[0]['minion_id']]
-        logger.info("minion_id:"+str(minion_id))
+        minion_id = result[0]['minion_id']
         product_id = result[0]['product_id']
         salt_api = salt_api_for_product(product_id)
         state, result = db.select('target', "where data -> '$.id'='%s'" % target_id)
         target_ip = result[0]['IP']
-
         command = 'snmpwalk -v 2c -t 0.5 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
-        sysDescr = salt_api.shell_remote_execution(minion_id, command)
+        sysDescr = salt_api.shell_remote_execution([minion_id], command)
 
-        result = {}
-        if result.__contains__("Timeout"):
-            result['status'] = '设备网络不通'
+        response_data = {}
+        if sysDescr.__contains__("Timeout"):
+            response_data['status'] = '设备网络不通'
         else:
-            result['status'] = "设备正常"
-        result['sysDescr'] = str(sysDescr[minion_id[0]])
-        return {"status": True, "message": '成功', "data": result}
+            response_data['status'] = "设备正常"
+        response_data['sysDescr'] = str(sysDescr[minion_id])
+        return {"status": True, "message": '成功', "data": response_data}
