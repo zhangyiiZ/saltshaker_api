@@ -171,14 +171,14 @@ class UploadTarget(Resource):
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
-            for i in range(0,len(targets)-1):
+            for i in range(0, len(targets) - 1):
                 target_dic = eval(targets[i])
                 target_dic['host_id'] = host_id
                 target_dic['id'] = uuid_prefix('t')
                 logger.info(str(target_dic))
                 insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                 if insert_status is not True:
-                    logger.error("error:"+insert_result)
+                    logger.error("error:" + insert_result)
                     return {"status": False, "message": insert_result}, 500
             return {"status": True, "message": ""}, 200
         except Exception as e:
@@ -311,7 +311,6 @@ class SinglePing(Resource):
         args = parser.parse_args()
         host_id = args['host_id']
         target_id = args['target_id']
-        result = {}
 
         db = DB()
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
@@ -324,10 +323,14 @@ class SinglePing(Resource):
         target_ip = result[0]['IP']
         logger.info("111")
 
-        command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
-        #sys_descr = salt_api.shell_remote_execution(minion_id, command)
+        command = 'snmpwalk -v 2c -t 0.5 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
+        sys_descr = salt_api.shell_remote_execution(minion_id, command)
 
-        result['status'] = command
-        result['sysDescr'] = 'wait'
+        result = {}
+        if sys_descr.__contains__("Timeout"):
+            result['status'] = '网络不通'
+        else:
+            result['status'] = command
+        result['sysDescr'] = str(sys_descr)
 
         return {"status": True, "message": '成功', "data": result}
