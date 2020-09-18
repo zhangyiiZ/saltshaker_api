@@ -291,7 +291,7 @@ class PingList(Resource):
         thread_pool.shutdown(wait=True)
         for future in futures:
             result = future.result()
-            if str(result["command"]).__contains__('外网'):
+            if str(result["status"]).__contains__('外网'):
                 targets_not.append(result["target"])
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
 
@@ -299,8 +299,8 @@ class PingList(Resource):
 def pingTarget(target, minion_id, salt_api):
     command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
     logger.info(command)
-    # result = {'target': target, 'command': salt_api.shell_remote_execution(minion_id, command)}
-    result = {'target': target, 'command': target["type"]}
+    # result = {'target': target, 'status': salt_api.shell_remote_execution(minion_id, command)}
+    result = {'target': target, 'status': target["type"]}
     return result
 
 
@@ -311,26 +311,25 @@ class SinglePing(Resource):
         args = parser.parse_args()
         host_id = args['host_id']
         target_id = args['target_id']
-
+        #获得所需参数minion_id、product_id、target_ip
         db = DB()
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         minion_id = result[0]['minion_id']
         product_id = result[0]['product_id']
+        logger.info('product_id'+product_id)
         salt_api = salt_api_for_product(product_id)
-
         state, result = db.select('target', "where data -> '$.id'='%s'" % target_id)
         logger.info(str(result))
         target_ip = result[0]['IP']
-        logger.info("111")
 
         command = 'snmpwalk -v 2c -t 0.5 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
+        logger.info('minion_id'+minion_id)
         sys_descr = salt_api.shell_remote_execution(minion_id, command)
 
         result = {}
         if sys_descr.__contains__("Timeout"):
-            result['status'] = '网络不通'
+            result['status'] = '设备网络不通'
         else:
-            result['status'] = command
+            result['status'] = "设备正常"
         result['sysDescr'] = str(sys_descr)
-
         return {"status": True, "message": '成功', "data": result}
