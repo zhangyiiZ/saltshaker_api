@@ -318,6 +318,7 @@ class SinglePing(Resource):
         product_id = result[0]['product_id']
         logger.info('product_id'+product_id)
         salt_api = salt_api_for_product(product_id)
+        logger.info("salt_api:"+str(salt_api))
         state, result = db.select('target', "where data -> '$.id'='%s'" % target_id)
         logger.info(str(result))
         target_ip = result[0]['IP']

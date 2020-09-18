@@ -32,6 +32,7 @@ class ExecuteShell(Resource):
         minion_id = args["minion_id"]
         logger.info("product_id:~"+args["product_id"])
         salt_api = salt_api_for_product(args["product_id"])
+        logger.info('salt_api:'+str(salt_api))
         user_info = g.user_info
         if isinstance(salt_api, dict):
             return salt_api, 500
@@ -40,6 +41,7 @@ class ExecuteShell(Resource):
         status = verify_acl(acl_list, command)
         # acl deny 验证完成后执行命令
         if status["status"]:
+            logger.info('minion_id:'+str(minion_id))
             result = salt_api.shell_remote_execution(minion_id, command)
             logger.info("result:"+str(result))
             # 记录历史命令
