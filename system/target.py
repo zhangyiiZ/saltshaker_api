@@ -325,10 +325,9 @@ class SinglePing(Resource):
         command = 'snmpwalk -v 2c -t 0.5 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
         logger.info('minion_id'+minion_id)
         sys_descr = salt_api.shell_remote_execution(minion_id, command)
-        sys_descr_str = str(sys_descr)
 
         result = {}
-        if sys_descr_str.__contains__("Timeout"):
+        if sys_descr.__contains__("Timeout"):
             result['status'] = '设备网络不通'
         else:
             result['status'] = "设备正常"
