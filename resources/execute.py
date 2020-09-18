@@ -30,8 +30,8 @@ class ExecuteShell(Resource):
             return {"status": False,
                     "message": "The specified command parameter does not exist"}, 400
         logger.info("product_id:!" + args["product_id"])
-        logger.info("minion_id:!" + args["minion_id"])
         minion_id = args["minion_id"]
+        logger.info("minion_id:!" + minion_id)
         salt_api = salt_api_for_product(args["product_id"])
         user_info = g.user_info
         if isinstance(salt_api, dict):
