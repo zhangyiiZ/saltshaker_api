@@ -324,12 +324,22 @@ class SinglePing(Resource):
 
         command = 'snmpwalk -v 2c -t 0.5 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
         logger.info('minion_id'+minion_id)
-        sys_descr = salt_api.shell_remote_execution(minion_id, command)
+        logger.info('command:'+command)
+        user_info = g.user_info
+        if isinstance(salt_api, dict):
+            return salt_api, 500
+        acl_list = user_info["acl"]
+        # 验证 acl
+        status = verify_acl(acl_list, command)
+        # acl deny 验证完成后执行命令
+        if status["status"]:
+            result = salt_api.shell_remote_execution(minion_id, command)
+            logger.info("result:"+str(result))
 
         result = {}
-        if sys_descr.__contains__("Timeout"):
+        if result.__contains__("Timeout"):
             result['status'] = '设备网络不通'
         else:
             result['status'] = "设备正常"
-        result['sysDescr'] = str(sys_descr)
+        result['sysDescr'] = str(result)
         return {"status": True, "message": '成功', "data": result}
