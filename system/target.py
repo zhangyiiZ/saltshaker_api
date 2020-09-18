@@ -320,7 +320,9 @@ class SinglePing(Resource):
         salt_api = salt_api_for_product(product_id)
 
         state, result = db.select('target', "where data -> '$.id'='%s'" % target_id)
+        logger.info(str(result))
         target_ip = result[0]['IP']
+        logger.info("111")
 
         command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
         #sys_descr = salt_api.shell_remote_execution(minion_id, command)
