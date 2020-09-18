@@ -323,7 +323,7 @@ class SinglePing(Resource):
         sysDescr = salt_api.shell_remote_execution([minion_id], command)
 
         response_data = {}
-        if sysDescr.__contains__("Timeout"):
+        if str(sysDescr[minion_id]).__contains__("Timeout"):
             response_data['status'] = '设备网络不通'
         else:
             response_data['status'] = "设备正常"
