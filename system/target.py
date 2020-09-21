@@ -277,7 +277,7 @@ class ConfigGenerate(Resource):
             try:
                 project.commits.create(data_create)
             except Exception as e:
-                logger.info('update')
+                logger.info('update'+str(e))
                 project.commits.create(data_update)
             # 验证权限,执行发送功能
         command_path = 'mkdir -p '+path_str
