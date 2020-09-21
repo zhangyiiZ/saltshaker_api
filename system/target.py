@@ -248,12 +248,23 @@ class ConfigGenerate(Resource):
 
         project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
-        data = {
+        data_create = {
             'branch': product_name,
             'commit_message': command,
             'actions': [
                 {
-                    'action': 'create',
+                    'action': "create",
+                    'file_path': minion_id + '/' + file_name,
+                    'content': strresult
+                }
+            ]
+        }
+        data_update = {
+            'branch': product_name,
+            'commit_message': command,
+            'actions': [
+                {
+                    'action': "update",
                     'file_path': minion_id + '/' + file_name,
                     'content': strresult
                 }
@@ -263,15 +274,17 @@ class ConfigGenerate(Resource):
             return project, 500
         else:
             try:
-                project.commits.create(data)
+                project.commits.create(data_create)
             except Exception as e:
-                data['actions']['action'] = 'update'
-                project.commits.create(data)
+                logger.info('update')
+                project.commits.create(data_update)
             # 验证权限,执行发送功能
         command_path = 'mkdir -p '+path_str
-        command = command_path+'\n'+'cd /tmp/config \n git pull \n' + command
+        logger.info('minion_id:'+minion_id)
+        salt_api.shell_remote_execution(minion_id, command_path)
+        command = 'cd /tmp/config \n git pull \n' + command
         logger.info('command'+command)
-        result = salt_api.shell_remote_execution(master_id, command)
+        salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
 
 
