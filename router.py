@@ -3,7 +3,7 @@ import flask_restful
 from resources.minions import MinionsKeys, MinionsStatus, MinionsGrains, MinionsGrainsList
 from resources.job import Job, JobList, JobManager
 from resources.event import Event, EventList
-from system.product import ProductList, Product, ProductCheck
+from system.product import ProductList, Product, ProductCheck, ProductListConfig
 from system.role import RoleList, Role
 from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList, SinglePing
 from system.user import UserList, User, Register, ResetPassword, ResetPasswordByOwner, ChangeUserInfo
@@ -40,6 +40,7 @@ api.add_resource(SSEStatus, "/saltshaker/api/v1.0/sse/status")
 
 # product
 api.add_resource(ProductList, "/saltshaker/api/v1.0/product")
+api.add_resource(ProductListConfig, "/saltshaker/api/v1.0/product/config")
 api.add_resource(Product, "/saltshaker/api/v1.0/product/<string:product_id>")
 api.add_resource(ProductCheck, "/saltshaker/api/v1.0/product/check/<string:name>")
 

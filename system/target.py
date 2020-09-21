@@ -249,7 +249,7 @@ class ConfigGenerate(Resource):
         project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
         data_create = {
-            'branch': product_name,
+            'branch': product_name+"配置",
             'commit_message': command,
             'actions': [
                 {
@@ -260,7 +260,7 @@ class ConfigGenerate(Resource):
             ]
         }
         data_update = {
-            'branch': product_name,
+            'branch': product_name+"配置",
             'commit_message': command,
             'actions': [
                 {

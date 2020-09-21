@@ -181,6 +181,48 @@ class ProductList(Resource):
             logger.error("Select product name error: %s" % result)
             return {"status": False, "message": result}, 500
 
+class ProductListConfig(Resource):
+    @access_required(role_dict["common_user"])
+    def get(self):
+        logger.info("ProductListConfig")
+        db = DB()
+        user_info = g.user_info
+        role_sql = []
+        if user_info["role"]:
+            for role in user_info["role"]:
+                role_sql.append("data -> '$.id'='%s'" % role)
+            sql = " or ".join(role_sql)
+            role_status, role_result = db.select("role", "where %s" % sql)
+            if role_status and role_result:
+                for role in role_result:
+                    if role["tag"] == 0:
+                        status, result = db.select("product", "where data -> '$.name'='%s'" % 'config')
+                        db.close_mysql()
+                        product_list = []
+                        if status is True:
+                            if result:
+                                product_list = result
+                        else:
+                            return {"status": False, "message": result}, 500
+                        return {"data": product_list, "status": True, "message": ""}, 200
+        sql_list = []
+        product_list = []
+        if user_info["product"]:
+            for product in user_info["product"]:
+                sql_list.append("data -> '$.id'='%s'" % product)
+            sql = " or ".join(sql_list)
+            status, result = db.select("product", "where data -> '$.name'='%s'" % 'config')
+            db.close_mysql()
+            if status is True:
+                if result:
+                    product_list = result
+                    return {"data": product_list, "status": True, "message": ""}, 200
+                else:
+                    return {"status": False, "message": "Group does not exist"}, 404
+            else:
+                return {"status": False, "message": result}, 500
+        return {"data": product_list, "status": True, "message": ""}, 200
+
 
 class ProductCheck(Resource):
     @access_required(role_dict["common_user"])
