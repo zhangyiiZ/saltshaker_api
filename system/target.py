@@ -218,10 +218,12 @@ class ConfigGenerate(Resource):
         product_id = host['product_id']
         minion_id = host['minion_id']
         state, result = db.select('product', "where data -> '$.id'='%s'" % product_id)
-        product = result[0]
-        product_name = product['name']
-        master_id = product['salt_master_id']
+        product_host = result[0]
+        product_name = product_host['name']
+        master_id = product_host['salt_master_id']
         salt_api = salt_api_for_product(product_id)
+        state, result = db.select('product', "where data -> '$.name'='%s'" % 'config')
+        product_config_id = result[0]['id']
         # 完成命令拼装
         source = '/tmp/config/' + minion_id + '/' + file_name
         dest = path_str
@@ -243,7 +245,8 @@ class ConfigGenerate(Resource):
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
         # 上传文件到gitlab中
-        project, _ = gitlab_project('p-11992012f3fa11ea96120242ac120002', 'state_project')
+
+        project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
         data = {
             'branch': product_name,
@@ -262,9 +265,11 @@ class ConfigGenerate(Resource):
             try:
                 project.commits.create(data)
             except Exception as e:
-                return {"status": False, "message": str(e)}, 500
+                data['actions']['action'] = 'update'
+                project.commits.create(data)
             # 验证权限,执行发送功能
-        command = 'cd /tmp/config \n git pull \n' + command
+        command_path = 'mkdir -p '+path_str
+        command = command_path+'\n'+'cd /tmp/config \n git pull \n' + command
         result = salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
 
