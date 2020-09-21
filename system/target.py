@@ -270,6 +270,7 @@ class ConfigGenerate(Resource):
             # 验证权限,执行发送功能
         command_path = 'mkdir -p '+path_str
         command = command_path+'\n'+'cd /tmp/config \n git pull \n' + command
+        logger.info('command'+command)
         result = salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
 
