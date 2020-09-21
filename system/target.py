@@ -248,14 +248,14 @@ class ConfigGenerate(Resource):
 
         project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
-        branch_name = product_name+"_config"
+        branch_name = 'master'
         data_create = {
             'branch': branch_name,
             'commit_message': command,
             'actions': [
                 {
                     'action': "create",
-                    'file_path': minion_id + '/' + file_name,
+                    'file_path': product_name+'/'+minion_id + '/' + file_name,
                     'content': strresult
                 }
             ]
@@ -266,7 +266,7 @@ class ConfigGenerate(Resource):
             'actions': [
                 {
                     'action': "update",
-                    'file_path': minion_id + '/' + file_name,
+                    'file_path': product_name+'/'+minion_id + '/' + file_name,
                     'content': strresult
                 }
             ]
