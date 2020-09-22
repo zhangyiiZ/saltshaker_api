@@ -270,10 +270,14 @@ class ConfigGenerate(Resource):
                 }
             ]
         }
-        if not dict(product_result[0]).__contains__("ifBranchExist"):
-            data_create['start_branch'] = 'master'
-            data_update['start_branch'] = 'master'
-            product_result['ifBranchExist'] = True
+        logger.info("111")
+        try:
+            if not (product_result[0]).__contains__("ifBranchExist"):
+                data_create['start_branch'] = 'master'
+                data_update['start_branch'] = 'master'
+                product_result['ifBranchExist'] = True
+        except Exception as e:
+            logger.info("222"+str(e))
 
         if isinstance(project, dict):
             return project, 500
