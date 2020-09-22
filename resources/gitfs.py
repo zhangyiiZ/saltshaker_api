@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 from flask_restful import Resource, reqparse, request
+
+from common.db import DB
 from fileserver.git_fs import gitlab_project
 from common.const import role_dict
 from common.log import loggers
@@ -183,3 +185,14 @@ class Upload(Resource):
                 logger.error("Upload file: %s" % e)
                 return {"status": False, "message": str(e)}, 500
             return {"status": True, "message": ""}, 200
+
+
+#获得所有的组
+class ConfigGroups(Resource):
+    @access_required(role_dict["common_user"])
+    def get(self):
+        db = DB()
+        state, groups_list = db.select('group', '')
+        if state:
+            return {"status": True, "message": "", "data":groups_list}, 200
+        else: return {"status": False, "message": str(state)}, 500
