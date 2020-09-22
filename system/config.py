@@ -9,7 +9,7 @@ from common.sso import access_required
 logger = loggers()
 parser = reqparse.RequestParser()
 parser.add_argument("desc_path", type=str, required=True, trim=True)
-parser.add_argument("target", type=list, required=True, trim=True)
+parser.add_argument("target", type=str, required=True, trim=True)
 
 
 # 获得所有的组
