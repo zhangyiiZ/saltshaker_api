@@ -217,8 +217,8 @@ class ConfigGenerate(Resource):
         host = result[0]
         product_id = host['product_id']
         minion_id = host['minion_id']
-        state, result = db.select('product', "where data -> '$.id'='%s'" % product_id)
-        product_host = result[0]
+        state, product_result = db.select('product', "where data -> '$.id'='%s'" % product_id)
+        product_host = product_result[0]
         product_name = product_host['name']
         master_id = product_host['salt_master_id']
         salt_api = salt_api_for_product(product_id)
@@ -245,14 +245,12 @@ class ConfigGenerate(Resource):
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
         # 上传文件到gitlab中
-
         project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
         branch_name = product_name + "_config"
         data_create = {
             'branch': branch_name,
             'commit_message': command,
-            'start_branch': 'master',
             'actions': [
                 {
                     'action': "create",
@@ -264,7 +262,6 @@ class ConfigGenerate(Resource):
         data_update = {
             'branch': branch_name,
             'commit_message': command,
-            'start_branch': 'master',
             'actions': [
                 {
                     'action': "update",
@@ -273,6 +270,11 @@ class ConfigGenerate(Resource):
                 }
             ]
         }
+        if not dict(product_result[0]).__contains__("ifBranchExist"):
+            data_create['start_branch'] = 'master'
+            data_update['start_branch'] = 'master'
+            product_result['ifBranchExist'] = True
+
         if isinstance(project, dict):
             return project, 500
         else:
