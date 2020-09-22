@@ -248,7 +248,7 @@ class ConfigGenerate(Resource):
 
         project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
-        branch_name = 'master'
+        branch_name = product_name+"_config"
         data_create = {
             'branch': branch_name,
             'commit_message': command,
@@ -277,8 +277,9 @@ class ConfigGenerate(Resource):
             try:
                 project.commits.create(data_create)
             except Exception as e:
-                logger.info('update'+str(e))
-                project.commits.create(data_update)
+                # logger.info('update'+str(e))
+                # project.commits.create(data_update)
+                return {"status": False, "message": str(e)}, 200
             # 验证权限,执行发送功能
         command_path = 'mkdir -p '+path_str
         logger.info('minion_id:'+minion_id)
