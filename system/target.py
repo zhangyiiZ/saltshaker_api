@@ -272,12 +272,14 @@ class ConfigGenerate(Resource):
         }
         logger.info("111")
         try:
-            if not eval(str(product_result[0])).__contains__("ifBranchExist"):
+            if not (product_result[0]).__contains__("ifBranchExist"):
                 data_create['start_branch'] = 'master'
                 data_update['start_branch'] = 'master'
-                product_result['ifBranchExist'] = True
+                product_result[0]['ifBranchExist'] = True
+                db.update_by_id('product', product_result, product_id)
         except Exception as e:
-            logger.info("222"+str(e))
+            logger.info("222" + str(e))
+            return {"status": False, "message": str(e)}, 500
 
         if isinstance(project, dict):
             return project, 500
