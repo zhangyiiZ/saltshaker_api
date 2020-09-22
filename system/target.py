@@ -248,10 +248,11 @@ class ConfigGenerate(Resource):
 
         project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
-        branch_name = product_name+"_config"
+        branch_name = product_name + "_config"
         data_create = {
             'branch': branch_name,
             'commit_message': command,
+            'start_branch': 'master',
             'actions': [
                 {
                     'action': "create",
@@ -281,11 +282,11 @@ class ConfigGenerate(Resource):
                 # project.commits.create(data_update)
                 return {"status": False, "message": str(e)}, 200
             # 验证权限,执行发送功能
-        command_path = 'mkdir -p '+path_str
-        logger.info('minion_id:'+minion_id)
+        command_path = 'mkdir -p ' + path_str
+        logger.info('minion_id:' + minion_id)
         salt_api.shell_remote_execution(minion_id, command_path)
         command = 'cd /tmp/config \n git pull \n' + command
-        logger.info('command'+command)
+        logger.info('command' + command)
         salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
 
@@ -332,7 +333,7 @@ class SinglePing(Resource):
         args = parser.parse_args()
         host_id = args['host_id']
         target_id = args['target_id']
-        #获得所需参数minion_id、product_id、target_ip
+        # 获得所需参数minion_id、product_id、target_ip
         db = DB()
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         minion_id = result[0]['minion_id']
