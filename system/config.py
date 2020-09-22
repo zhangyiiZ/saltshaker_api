@@ -26,7 +26,7 @@ class ConfigGroups(Resource):
 
 # 处理分发
 class Distribute(Resource):
-    @access_required(role_dict["commmon_user"])
+    @access_required(role_dict["common_user"])
     def post(self):
         args = parser.parse_args()
         desc_path = args["desc_path"]
