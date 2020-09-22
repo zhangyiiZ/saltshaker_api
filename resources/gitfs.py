@@ -2,7 +2,6 @@
 from flask_restful import Resource, reqparse, request
 
 from common.db import DB
-from common.utility import salt_api_for_product
 from fileserver.git_fs import gitlab_project
 from common.const import role_dict
 from common.log import loggers
