@@ -247,7 +247,7 @@ class ConfigGenerate(Resource):
         # 上传文件到gitlab中
         project, _ = gitlab_project(product_config_id, 'state_project')
         # 支持的action create, delete, move, update
-        branch_name = product_name + "_config"
+        branch_name = "master"
         data_create = {
             'branch': branch_name,
             'commit_message': command,
@@ -270,20 +270,20 @@ class ConfigGenerate(Resource):
                 }
             ]
         }
-        try:
-            if (product_result[0]).__contains__("ifBranchExist"):
-                if not product_result[0]['ifBranchExist']:
-                    data_create['start_branch'] = 'master'
-                    data_update['start_branch'] = 'master'
-                    product_result[0]['ifBranchExist'] = True
-                    db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
-            else:
-                data_create['start_branch'] = 'master'
-                data_update['start_branch'] = 'master'
-                product_result[0]['ifBranchExist'] = True
-                db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
-        except Exception as e:
-            return {"status": False, "message": str(e)}, 500
+        # try:
+        #     if (product_result[0]).__contains__("ifBranchExist"):
+        #         if not product_result[0]['ifBranchExist']:
+        #             data_create['start_branch'] = 'master'
+        #             data_update['start_branch'] = 'master'
+        #             product_result[0]['ifBranchExist'] = True
+        #             db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
+        #     else:
+        #         data_create['start_branch'] = 'master'
+        #         data_update['start_branch'] = 'master'
+        #         product_result[0]['ifBranchExist'] = True
+        #         db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
+        # except Exception as e:
+        #     return {"status": False, "message": str(e)}, 500
 
         if isinstance(project, dict):
             return project, 500
@@ -292,11 +292,7 @@ class ConfigGenerate(Resource):
                 project.commits.create(data_create)
             except Exception as e:
                 # logger.info('update'+str(e))
-                # project.commits.create(data_update)
-                if str(e) == '400: You can only create or edit files when you are on a branch':
-                    product_result[0]['ifBranchExist'] = False
-                    db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
-                return {"status": False, "message": str(e)}, 200
+                project.commits.create(data_update)
             # 验证权限,执行发送功能
         command_path = 'mkdir -p ' + path_str
         logger.info('minion_id:' + minion_id)
