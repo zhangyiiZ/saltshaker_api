@@ -3,6 +3,7 @@ import flask_restful
 from resources.minions import MinionsKeys, MinionsStatus, MinionsGrains, MinionsGrainsList
 from resources.job import Job, JobList, JobManager
 from resources.event import Event, EventList
+from system.config import ConfigGroups, Distribute
 from system.product import ProductList, Product, ProductCheck, ProductListConfig
 from system.role import RoleList, Role
 from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList, SinglePing
@@ -14,7 +15,7 @@ from system.host import HostList, Host, HostListForTarget
 from resources.log import LogList
 from resources.cherry_stats import CherryStats
 from resources.execute import ExecuteShell, ExecuteSLS, ExecuteGroups
-from resources.gitfs import BranchList, FilesList, FileContent, Commit, Upload, ConfigGroups, Distribute
+from resources.gitfs import BranchList, FilesList, FileContent, Commit, Upload
 from resources.dashboard import GrainsStatistics, TitleInfo, Minion, ServiceStatus
 from kit.tools import HostSync, GrainsSync
 from resources.command import HistoryList
@@ -96,8 +97,7 @@ api.add_resource(FilesList, "/saltshaker/api/v1.0/gitlab/file")
 api.add_resource(FileContent, "/saltshaker/api/v1.0/gitlab/content")
 api.add_resource(Commit, "/saltshaker/api/v1.0/gitlab/commit")
 api.add_resource(Upload, "/saltshaker/api/v1.0/gitlab/upload")
-api.add_resource(ConfigGroups, "/saltshaker/api/v1.0/gitlab/group")
-api.add_resource(Distribute, "/saltshaker/api/v1.0/gitlab/distribute")
+
 
 # audit log
 api.add_resource(LogList, "/saltshaker/api/v1.0/log")
@@ -146,3 +146,7 @@ api.add_resource(UploadTarget, "/saltshaker/api/v1.0/target/upload")
 api.add_resource(ConfigGenerate, "/saltshaker/api/v1.0/target/config")
 api.add_resource(PingList, "/saltshaker/api/v1.0/target/ping")
 api.add_resource(SinglePing, "/saltshaker/api/v1.0/target/single")
+
+#config
+api.add_resource(ConfigGroups, "/saltshaker/api/v1.0/config/group")
+api.add_resource(Distribute, "/saltshaker/api/v1.0/config/distribute")
