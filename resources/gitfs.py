@@ -192,7 +192,7 @@ class ConfigGroups(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
         db = DB()
-        state, groups_list = db.select('group', '')
+        state, groups_list = db.select('groups', '')
         if state:
             return {"status": True, "message": "", "data":groups_list}, 200
         else: return {"status": False, "message": str(state)}, 500
