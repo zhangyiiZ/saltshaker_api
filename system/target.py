@@ -266,7 +266,7 @@ class ConfigGenerate(Resource):
             'actions': [
                 {
                     'action': "update",
-                    'file_path': product_name+'/'+minion_id + '/' + file_name,
+                    'file_path': minion_id + '/' + file_name,
                     'content': strresult
                 }
             ]
