@@ -276,7 +276,7 @@ class ConfigGenerate(Resource):
                 data_create['start_branch'] = 'master'
                 data_update['start_branch'] = 'master'
                 product_result[0]['ifBranchExist'] = True
-                db.update_by_id('product', product_result, product_id)
+                db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
         except Exception as e:
             logger.info("222" + str(e))
             return {"status": False, "message": str(e)}, 500
