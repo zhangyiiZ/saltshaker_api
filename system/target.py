@@ -272,7 +272,7 @@ class ConfigGenerate(Resource):
         }
         logger.info("111")
         try:
-            if not eval(product_result[0]).__contains__("ifBranchExist"):
+            if not eval(str(product_result[0])).__contains__("ifBranchExist"):
                 data_create['start_branch'] = 'master'
                 data_update['start_branch'] = 'master'
                 product_result['ifBranchExist'] = True
