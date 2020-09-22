@@ -14,7 +14,7 @@ from system.host import HostList, Host, HostListForTarget
 from resources.log import LogList
 from resources.cherry_stats import CherryStats
 from resources.execute import ExecuteShell, ExecuteSLS, ExecuteGroups
-from resources.gitfs import BranchList, FilesList, FileContent, Commit, Upload, ConfigGroups
+from resources.gitfs import BranchList, FilesList, FileContent, Commit, Upload, ConfigGroups, Distribute
 from resources.dashboard import GrainsStatistics, TitleInfo, Minion, ServiceStatus
 from kit.tools import HostSync, GrainsSync
 from resources.command import HistoryList
@@ -97,6 +97,7 @@ api.add_resource(FileContent, "/saltshaker/api/v1.0/gitlab/content")
 api.add_resource(Commit, "/saltshaker/api/v1.0/gitlab/commit")
 api.add_resource(Upload, "/saltshaker/api/v1.0/gitlab/upload")
 api.add_resource(ConfigGroups, "/saltshaker/api/v1.0/gitlab/group")
+api.add_resource(Distribute, "/saltshaker/api/v1.0/gitlab/distribute")
 
 # audit log
 api.add_resource(LogList, "/saltshaker/api/v1.0/log")
