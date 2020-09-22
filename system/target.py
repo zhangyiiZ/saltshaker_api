@@ -264,6 +264,7 @@ class ConfigGenerate(Resource):
         data_update = {
             'branch': branch_name,
             'commit_message': command,
+            'start_branch': 'master',
             'actions': [
                 {
                     'action': "update",
