@@ -53,11 +53,14 @@ class Distribute(Resource):
         try:
             for minion_id in target_minion_list:
                 command_path = 'mkdir -p ' + desc_path
-                salt_api.shell_remote_execution([minion_id], command_path)
+                logger.info("command_path:"+command_path)
+                result =salt_api.shell_remote_execution([minion_id], command_path)
+                logger.info("result1:"+str(result))
                 command_distribute = 'salt-cp ' + minion_id + ' ' + source_path + ' ' + desc_path
                 command = 'cd /tmp/config \n git pull \n' + command_distribute
                 logger.info('command' + command)
-                salt_api.shell_remote_execution([master_id], command)
+                result = salt_api.shell_remote_execution([master_id], command)
+                logger.info("result2:" + str(result))
         except Exception as e:
             logger.info("Exception:"+str(e))
         db.close_mysql()
