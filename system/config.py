@@ -19,8 +19,10 @@ class ConfigGroups(Resource):
         db = DB()
         state, groups_list = db.select('groups', '')
         if state:
+            db.close_mysql()
             return {"status": True, "message": "", "data": groups_list}, 200
         else:
+            db.close_mysql()
             return {"status": False, "message": str(state)}, 500
 
 
@@ -31,7 +33,6 @@ class Distribute(Resource):
         args = parser.parse_args()
         desc_path = args["desc_path"]
         target = args["target"]
-        logger.info('desc:' + desc_path + " target:" + str(target))
         db = DB()
         target_minion_list = []
         for group_id in target:
@@ -48,4 +49,36 @@ class Distribute(Resource):
         command = 'cat /home/111'
         result = salt_api.shell_remote_execution(target_minion_list, command)
         logger.info('result:' + str(result))
+        db.close_mysql()
+        return {"status": True, "message": 'success'}, 200
+
+# 获得所有的组
+class ConfigHosts(Resource):
+    @access_required(role_dict["common_user"])
+    def get(self):
+        db = DB()
+        state, hosts_list = db.select('host', '')
+        if state:
+            db.close_mysql()
+            return {"status": True, "message": "", "data": hosts_list}, 200
+        else:
+            db.close_mysql()
+            return {"status": False, "message": str(state)}, 500
+
+
+# 处理分发
+class Synchronize(Resource):
+    @access_required(role_dict["common_user"])
+    def post(self):
+        args = parser.parse_args()
+        desc_path = args["desc_path"]
+        target = args["target"]
+        db = DB()
+        state, result = db.select('product', "where data -> '$.name'='%s'" % 'config')
+        product_config_id = result[0]['id']
+        salt_api = salt_api_for_product(product_config_id)
+        command = 'cat /home/111'
+        result = salt_api.shell_remote_execution(target, command)
+        logger.info('result:' + str(result))
+        db.close_mysql()
         return {"status": True, "message": 'success'}, 200
