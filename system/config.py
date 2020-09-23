@@ -34,7 +34,7 @@ class Distribute(Resource):
         args = parser.parse_args()
         desc_path = args["desc_path"]
         target = args["target"]
-        file_path = args["target"]
+        file_path = args["file_path"]
         db = DB()
         target_minion_list = []
         for group_id in target:
