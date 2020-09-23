@@ -50,13 +50,16 @@ class Distribute(Resource):
         master_id = result[0]['salt_master_id']
         salt_api = salt_api_for_product(product_config_id)
         source_path = '/tmp/config/' + file_path
-        for minion_id in target_minion_list:
-            command_path = 'mkdir -p ' + desc_path
-            salt_api.shell_remote_execution(minion_id, command_path)
-            command_distribute = 'salt-cp ' + minion_id + ' ' + source_path + ' ' + desc_path
-            command = 'cd /tmp/config \n git pull \n' + command_distribute
-            logger.info('command' + command)
-            salt_api.shell_remote_execution(master_id, command)
+        try:
+            for minion_id in target_minion_list:
+                command_path = 'mkdir -p ' + desc_path
+                salt_api.shell_remote_execution(minion_id, command_path)
+                command_distribute = 'salt-cp ' + minion_id + ' ' + source_path + ' ' + desc_path
+                command = 'cd /tmp/config \n git pull \n' + command_distribute
+                logger.info('command' + command)
+                salt_api.shell_remote_execution(master_id, command)
+        except Exception as e:
+            logger.info("Exception:"+str(e))
         db.close_mysql()
         return {"status": True, "message": 'success'}, 200
 
