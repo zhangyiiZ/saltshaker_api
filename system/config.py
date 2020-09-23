@@ -53,6 +53,7 @@ class Distribute(Resource):
         logger.info(str(salt_api))
         source_path = '/tmp/config/' + file_path
         logger.info(source_path)
+        logger.info(target_minion_list[0])
         for minion_id in target_minion_list:
             logger.info('minion_id:' + minion_id)
             # command_path = 'mkdir -p ' + desc_path
