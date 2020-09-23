@@ -3,7 +3,7 @@ import flask_restful
 from resources.minions import MinionsKeys, MinionsStatus, MinionsGrains, MinionsGrainsList
 from resources.job import Job, JobList, JobManager
 from resources.event import Event, EventList
-from system.config import ConfigGroups, Distribute, Synchronize
+from system.config import ConfigGroups, Distribute, Synchronize, ConfigHosts
 from system.product import ProductList, Product, ProductCheck, ProductListConfig
 from system.role import RoleList, Role
 from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList, SinglePing
@@ -149,5 +149,6 @@ api.add_resource(SinglePing, "/saltshaker/api/v1.0/target/single")
 
 #config
 api.add_resource(ConfigGroups, "/saltshaker/api/v1.0/config/group")
+api.add_resource(ConfigHosts, "/saltshaker/api/v1.0/config/host")
 api.add_resource(Distribute, "/saltshaker/api/v1.0/config/distribute")
 api.add_resource(Synchronize, "/saltshaker/api/v1.0/config/synchronize")
