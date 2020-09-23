@@ -48,7 +48,7 @@ class Distribute(Resource):
         state, result = db.select('product', "where data -> '$.name'='%s'" % 'config')
         product_config_id = result[0]['id']
         master_id = result[0]['salt_master_id']
-        salt_api = salt_api_for_product(product_config_id)
+        salt_api = salt_api_for_product([product_config_id])
         source_path = '/tmp/config/' + file_path
         try:
             for minion_id in target_minion_list:
