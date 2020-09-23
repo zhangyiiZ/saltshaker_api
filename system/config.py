@@ -9,6 +9,7 @@ from common.sso import access_required
 logger = loggers()
 parser = reqparse.RequestParser()
 parser.add_argument("desc_path", type=str, required=True, trim=True)
+parser.add_argument("file_path", type=str, default='', trim=True)
 parser.add_argument("target", type=str, required=True, action="append")
 
 
@@ -33,6 +34,7 @@ class Distribute(Resource):
         args = parser.parse_args()
         desc_path = args["desc_path"]
         target = args["target"]
+        file_path = args["target"]
         db = DB()
         target_minion_list = []
         for group_id in target:
@@ -45,14 +47,21 @@ class Distribute(Resource):
 
         state, result = db.select('product', "where data -> '$.name'='%s'" % 'config')
         product_config_id = result[0]['id']
+        master_id = result[0]['salt_master_id']
         salt_api = salt_api_for_product(product_config_id)
-        command = 'cat /home/111'
-        result = salt_api.shell_remote_execution(target_minion_list, command)
-        logger.info('result:' + str(result))
+        source_path = '/tmp/config/' + file_path
+        for minion_id in target_minion_list:
+            command_path = 'mkdir -p ' + desc_path
+            salt_api.shell_remote_execution(minion_id, command_path)
+            command_distribute = 'salt-cp ' + minion_id + ' ' + source_path + ' ' + desc_path
+            command = 'cd /tmp/config \n git pull \n' + command_distribute
+            logger.info('command' + command)
+            salt_api.shell_remote_execution(master_id, command)
         db.close_mysql()
         return {"status": True, "message": 'success'}, 200
 
-# 获得所有的组
+
+# 获得所有的主机
 class ConfigHosts(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
@@ -66,7 +75,7 @@ class ConfigHosts(Resource):
             return {"status": False, "message": str(state)}, 500
 
 
-# 处理分发
+# 处理同步
 class Synchronize(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
