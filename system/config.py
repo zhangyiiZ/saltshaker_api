@@ -48,10 +48,13 @@ class Distribute(Resource):
         state, result = db.select('product', "where data -> '$.name'='%s'" % 'config')
         product_config_id = result[0]['id']
         master_id = result[0]['salt_master_id']
+        logger.info('master_id:'+master_id)
         salt_api = salt_api_for_product(product_config_id)
+        logger.info(str(salt_api))
         source_path = '/tmp/config/' + file_path
         try:
             for minion_id in target_minion_list:
+                logger.info('minion_id:' + minion_id)
                 command_path = 'mkdir -p ' + desc_path
                 logger.info("command_path:"+command_path)
                 result =salt_api.shell_remote_execution([minion_id], command_path)
