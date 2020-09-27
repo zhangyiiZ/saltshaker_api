@@ -10,15 +10,12 @@ from common.db import DB
 from common.utility import uuid_prefix, salt_api_for_product
 from common.sso import access_required
 import json
-
 from common.xlsx import Xlsx
 from fileserver.git_fs import gitlab_project
-from resources.execute import verify_acl
 from system.user import update_user_privilege, update_user_product
 from common.const import role_dict
 from fileserver.rsync_fs import rsync_config
-from common.saltstack_api import SaltAPI
-import gitlab
+
 
 logger = loggers()
 
@@ -222,8 +219,6 @@ class ConfigGenerate(Resource):
         product_name = product_host['name']
         master_id = product_host['salt_master_id']
         salt_api = salt_api_for_product(product_id)
-        state, result = db.select('product', "where data -> '$.name'='%s'" % 'config')
-        product_config_id = result[0]['id']
         # 完成命令拼装
         source = '/tmp/config/' + minion_id + '/' + file_name
         dest = path_str
@@ -245,7 +240,7 @@ class ConfigGenerate(Resource):
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
         # 上传文件到gitlab中
-        project, _ = gitlab_project(product_config_id, 'state_project')
+        project, _ = gitlab_project(product_id, 'state_project')
         # 支持的action create, delete, move, update
         branch_name = "master"
         data_create = {
@@ -270,21 +265,6 @@ class ConfigGenerate(Resource):
                 }
             ]
         }
-        # try:
-        #     if (product_result[0]).__contains__("ifBranchExist"):
-        #         if not product_result[0]['ifBranchExist']:
-        #             data_create['start_branch'] = 'master'
-        #             data_update['start_branch'] = 'master'
-        #             product_result[0]['ifBranchExist'] = True
-        #             db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
-        #     else:
-        #         data_create['start_branch'] = 'master'
-        #         data_update['start_branch'] = 'master'
-        #         product_result[0]['ifBranchExist'] = True
-        #         db.update_by_id('product', json.dumps(product_result[0], ensure_ascii=False), product_id)
-        # except Exception as e:
-        #     return {"status": False, "message": str(e)}, 500
-
         if isinstance(project, dict):
             return project, 500
         else:

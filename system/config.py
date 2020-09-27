@@ -60,7 +60,6 @@ class Distribute(Resource):
         return {"status": True, "message": 'success'}, 200
 
 
-
 # 获得所有的主机
 class ConfigHosts(Resource):
     @access_required(role_dict["common_user"])
