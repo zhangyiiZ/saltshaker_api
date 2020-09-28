@@ -155,7 +155,8 @@ def menu_list(username):
                                 7, 70, 71,
                                 8, 80,
                                 9, 90, 91, 92, 93,
-                                100, 101, 102, 103, 104
+                                10, 101, 102, 103, 104,
+                                110, 111, 112, 113, 114
                                 ]
                         break
                     elif result["tag"] == role_dict["product"]:

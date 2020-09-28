@@ -128,29 +128,28 @@ class TargetList(Resource):
         if insert_status is not True:
             db.close_mysql()
             return {"status": False, "message": insert_result}, 500
-        return {"status": True, "message": insert_result}, 200
-        # status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
-        # if status is True:
-        #     if (len(result) == 0):
-        #         insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-        #         if insert_status is not True:
-        #             logger.error("Add target error: %s" % insert_result)
-        #             db.close_mysql()
-        #             return {"status": False, "message": insert_result}, 500
-        #     elif result[0]['host_id'] != host_id:
-        #         insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-        #         if insert_status is not True:
-        #             logger.error("Add target error: %s" % insert_result)
-        #             db.close_mysql()
-        #             return {"status": False, "message": insert_result}, 500
-        #     else:
-        #         db.close_mysql()
-        #         return {"status": False, "message": "target already exists"}, 500
-        # else:
-        #     db.close_mysql()
-        #     return {"status": False, "message": result}, 500
-        # db.close_mysql()
-        # return {"status": True, "message": result}, 200
+        status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
+        if status is True:
+            if len(result) == 0:
+                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+                if insert_status is not True:
+                    logger.error("Add target error: %s" % insert_result)
+                    db.close_mysql()
+                    return {"status": False, "message": insert_result}, 500
+            elif result[0]['host_id'] != host_id:
+                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+                if insert_status is not True:
+                    logger.error("Add target error: %s" % insert_result)
+                    db.close_mysql()
+                    return {"status": False, "message": insert_result}, 500
+            else:
+                db.close_mysql()
+                return {"status": False, "message": "target already exists"}, 500
+        else:
+            db.close_mysql()
+            return {"status": False, "message": result}, 500
+        db.close_mysql()
+        return {"status": True, "message": result}, 200
 
 
 # 上传文件
@@ -168,6 +167,9 @@ class UploadTarget(Resource):
             xlsx_file.read()
             config_db_result = xlsx_file.export_db()
             targets = config_db_result.split(';')
+            status, set_repeat = self.get_repeat_target(targets)
+            if not status:
+                return {"status": False, "message": "存在重复IP！为："+str(set_repeat)}, 500
             for i in range(0, len(targets) - 1):
                 target_dic = eval(targets[i])
                 target_dic['host_id'] = host_id
@@ -183,6 +185,21 @@ class UploadTarget(Resource):
         finally:
             logger.info("close db")
             db.close_mysql()
+
+    def get_repeat_target(self,target_list):
+        set_base = set()
+        set_repeat = set()
+        for i in range(0, len(target_list) - 1):
+            target_dic = eval(target_list[i])
+            key = target_dic['IP']
+            if set_base.__contains__(key):
+                set_repeat.add(key)
+            else:
+                set_base.add(key)
+        if set_repeat:
+            return False, set_repeat
+        else:
+            return True, set_repeat
 
 
 class ConfigGenerate(Resource):
@@ -305,16 +322,15 @@ class PingList(Resource):
         thread_pool.shutdown(wait=True)
         for future in futures:
             result = future.result()
-            if str(result["status"]).__contains__('外网'):
+            if str(result[minion_id]).__contains__("Timeout"):
                 targets_not.append(result["target"])
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
 
 
 def pingTarget(target, minion_id, salt_api):
-    command = 'snmpwalk -v 2c -t 0.005 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
+    command = 'snmpwalk -v 2c -t 0.05 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
     logger.info(command)
-    # result = {'target': target, 'status': salt_api.shell_remote_execution([minion_id], command)}
-    result = {'target': target, 'status': target["type"]}
+    result = {'target': target, 'status': salt_api.shell_remote_execution([minion_id], command)}
     return result
 
 
@@ -333,7 +349,7 @@ class SinglePing(Resource):
         salt_api = salt_api_for_product(product_id)
         state, result = db.select('target', "where data -> '$.id'='%s'" % target_id)
         target_ip = result[0]['IP']
-        command = 'snmpwalk -v 2c -t 0.5 -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
+        command = 'snmpwalk -v 2c -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
         sysDescr = salt_api.shell_remote_execution([minion_id], command)
 
         response_data = {}
