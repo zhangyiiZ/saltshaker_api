@@ -22,41 +22,36 @@ parser.add_argument("group", type=str, default=[], action="append")
 
 class Projects(Resource):
     @access_required(role_dict["product"])
-    def get(self, groups_id):
+    def get(self, project_id):
         db = DB()
-        status, result = db.select_by_id("groups", groups_id)
+        status, result = db.select_by_id("projects", project_id)
         db.close_mysql()
         if status is True:
             if result:
                 return {"data": result, "status": True, "message": ""}, 200
             else:
-                return {"status": False, "message": "%s does not exist" % groups_id}, 404
+                return {"status": False, "message": "%s does not exist" % project_id}, 404
         else:
             return {"status": False, "message": result}, 500
 
     @access_required(role_dict["product"])
-    def delete(self, groups_id):
+    def delete(self, project_id):
         user = g.user_info["username"]
         db = DB()
-        status, result = db.delete_by_id("groups", groups_id)
+        status, result = db.delete_by_id("projects", project_id)
         db.close_mysql()
         if status is not True:
-            logger.error("Delete groups error: %s" % result)
+            logger.error("Delete projects error: %s" % result)
             return {"status": False, "message": result}, 500
         if result is 0:
-            return {"status": False, "message": "%s does not exist" % groups_id}, 404
-        audit_log(user, groups_id, "", "groups", "delete")
-        info = update_user_privilege("groups", groups_id)
-        if info["status"] is False:
-            return {"status": False, "message": info["message"]}, 500
+            return {"status": False, "message": "%s does not exist" % project_id}, 404
         return {"status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
-    def put(self, groups_id):
-        user = g.user_info["username"]
+    def put(self, project_id):
         args = parser.parse_args()
-        args["id"] = groups_id
-        groups = args
+        args["id"] = project_id
+        projects = args
         db = DB()
         # 判断产品线是否存在
         status, result = db.select_by_id("product", args["product_id"])
@@ -67,27 +62,26 @@ class Projects(Resource):
         else:
             return {"status": False, "message": result}, 500
         # 判断是否存在
-        select_status, select_result = db.select_by_id("groups", groups_id)
+        select_status, select_result = db.select_by_id("projects", project_id)
         if select_status is not True:
             db.close_mysql()
-            logger.error("Modify groups error: %s" % select_result)
+            logger.error("Modify projects error: %s" % select_result)
             return {"status": False, "message": select_result}, 500
         if not select_result:
             db.close_mysql()
-            return {"status": False, "message": "%s does not exist" % groups_id}, 404
+            return {"status": False, "message": "%s does not exist" % project_id}, 404
         # 判断名字否已经存在
-        status, result = db.select("groups", "where data -> '$.name'='%s' and  data -> '$.product_id'='%s'"
+        status, result = db.select("projects", "where data -> '$.name'='%s' and  data -> '$.product_id'='%s'"
                                    % (args["name"], args["product_id"]))
         if status is True and result:
-            if groups_id != result[0].get("id"):
+            if project_id != result[0].get("id"):
                 db.close_mysql()
-                return {"status": False, "message": "The groups name already exists"}, 200
-        status, result = db.update_by_id("groups", json.dumps(groups, ensure_ascii=False), groups_id)
+                return {"status": False, "message": "The projects name already exists"}, 200
+        status, result = db.update_by_id("projects", json.dumps(projects, ensure_ascii=False), project_id)
         db.close_mysql()
         if status is not True:
-            logger.error("Modify groups error: %s" % result)
+            logger.error("Modify projects error: %s" % result)
             return {"status": False, "message": result}, 500
-        audit_log(user, groups_id, "", "groups", "edit")
         return {"status": True, "message": ""}, 200
 
 
@@ -107,8 +101,7 @@ class ProjectsList(Resource):
     def post(self):
         args = parser.parse_args()
         args["id"] = uuid_prefix("project")
-        user = g.user_info["username"]
-        groups = args
+        projects = args
         db = DB()
         status, result = db.select_by_id("product", args["product_id"])
         if status is True:
@@ -121,32 +114,19 @@ class ProjectsList(Resource):
                                    % (args["name"], args["product_id"]))
         if status is True:
             if len(result) == 0:
-                insert_status, insert_result = db.insert("projects", json.dumps(groups, ensure_ascii=False))
+                insert_status, insert_result = db.insert("projects", json.dumps(projects, ensure_ascii=False))
                 db.close_mysql()
                 if insert_status is not True:
-                    logger.error("Add groups error: %s" % insert_result)
+                    logger.error("Add projects error: %s" % insert_result)
                     return {"status": False, "message": insert_result}, 500
                 return {"status": True, "message": ""}, 201
             else:
                 db.close_mysql()
-                return {"status": False, "message": "The groups name already exists"}, 200
+                return {"status": False, "message": "The projects name already exists"}, 200
         else:
             db.close_mysql()
-            logger.error("Select groups name error: %s" % result)
+            logger.error("Select projects name error: %s" % result)
             return {"status": False, "message": result}, 500
 
 
-def group_to_user(gid, uid):
-    db = DB()
-    select_status, select_result = db.select_by_id("user", uid)
-    if select_status is True and select_result:
-        select_result["groups"].append(gid)
-    else:
-        return {"status": False, "message": select_result}
-    status, result = db.update_by_id("user", json.dumps(select_result, ensure_ascii=False), uid)
-    db.close_mysql()
-    if status is True:
-        return {"status": True, "message": ""}
-    else:
-        logger.error("Group to user error: %s" % result)
-        return {"status": False, "message": result}
+

@@ -156,4 +156,4 @@ api.add_resource(Synchronize, "/saltshaker/api/v1.0/config/synchronize")
 
 #project
 api.add_resource(ProjectsList, "/saltshaker/api/v1.0/projects")
-api.add_resource(Projects, "/saltshaker/api/v1.0/projects/<string:groups_id>")
+api.add_resource(Projects, "/saltshaker/api/v1.0/projects/<string:project_id>")
