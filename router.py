@@ -5,6 +5,7 @@ from resources.job import Job, JobList, JobManager
 from resources.event import Event, EventList
 from system.config import ConfigGroups, Distribute, Synchronize, ConfigHosts
 from system.product import ProductList, Product, ProductCheck, ProductListConfig
+from system.projects import ProjectsList, Projects
 from system.role import RoleList, Role
 from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList, SinglePing
 from system.user import UserList, User, Register, ResetPassword, ResetPasswordByOwner, ChangeUserInfo
@@ -152,3 +153,7 @@ api.add_resource(ConfigGroups, "/saltshaker/api/v1.0/config/group")
 api.add_resource(ConfigHosts, "/saltshaker/api/v1.0/config/host")
 api.add_resource(Distribute, "/saltshaker/api/v1.0/config/distribute")
 api.add_resource(Synchronize, "/saltshaker/api/v1.0/config/synchronize")
+
+#project
+api.add_resource(ProjectsList, "/saltshaker/api/v1.0/projects")
+api.add_resource(Projects, "/saltshaker/api/v1.0/projects/<string:groups_id>")
