@@ -106,7 +106,7 @@ class ProjectsList(Resource):
     @access_required(role_dict["product"])
     def post(self):
         args = parser.parse_args()
-        args["id"] = uuid_prefix("g")
+        args["id"] = uuid_prefix("project")
         user = g.user_info["username"]
         groups = args
         db = DB()
@@ -117,17 +117,15 @@ class ProjectsList(Resource):
                 return {"status": False, "message": "%s does not exist" % args["product_id"]}, 404
         else:
             return {"status": False, "message": result}, 500
-        status, result = db.select("groups", "where data -> '$.name'='%s' and data -> '$.product_id'='%s'"
+        status, result = db.select("projects", "where data -> '$.name'='%s' and data -> '$.product_id'='%s'"
                                    % (args["name"], args["product_id"]))
         if status is True:
             if len(result) == 0:
-                insert_status, insert_result = db.insert("groups", json.dumps(groups, ensure_ascii=False))
+                insert_status, insert_result = db.insert("projects", json.dumps(groups, ensure_ascii=False))
                 db.close_mysql()
                 if insert_status is not True:
                     logger.error("Add groups error: %s" % insert_result)
                     return {"status": False, "message": insert_result}, 500
-                audit_log(user, args["id"], "", "groups", "add")
-                group_to_user(args["id"], g.user_info["id"])
                 return {"status": True, "message": ""}, 201
             else:
                 db.close_mysql()
