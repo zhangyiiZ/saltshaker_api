@@ -109,13 +109,14 @@ class GroupsList(Resource):
         else:
             db.close_mysql()
             return {"status": False, "message": result}, 500
-
-        for group in group_list:
-            for project in project_list:
-                for group_project in project["group"]:
-                    if group["name"] == group_project:
-                        group["projects"].append(project["name"])
-
+        try:
+            for group in group_list:
+                for project in project_list:
+                    for group_project in project["group"]:
+                        if group["name"] == group_project:
+                            group["projects"].append(project["name"])
+        except Exception as e:
+            logger.info("exception:"+str(e))
         db.close_mysql()
         return {"data": group_list, "status": True, "message": ""}, 200
 
