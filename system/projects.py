@@ -16,7 +16,7 @@ parser = reqparse.RequestParser()
 parser.add_argument("name", type=str, required=True, trim=True)
 parser.add_argument("product_id", type=str, required=True, trim=True)
 # 不必填写的字段一定要指定默认值为""，否则无法转换成字典
-parser.add_argument("description", type=str, default="", trim=True)
+parser.add_argument("gitlab_name", type=str, default="", trim=True)
 parser.add_argument("group", type=str, default=[], action="append")
 
 
