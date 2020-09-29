@@ -39,10 +39,16 @@ class Groups(Resource):
     def delete(self, groups_id):
         user = g.user_info["username"]
         db = DB()
+        # 首先获得所需项目
+        status, result = db.select_by_id("groups", groups_id)
+        if status:
+            group = result
+        else:
+            return {"status": False, "message": str(result)}, 500
+        #执行删除
         status, result = db.delete_by_id("groups", groups_id)
-        db.close_mysql()
+
         if status is not True:
-            logger.error("Delete groups error: %s" % result)
             return {"status": False, "message": result}, 500
         if result is 0:
             return {"status": False, "message": "%s does not exist" % groups_id}, 404
@@ -50,6 +56,17 @@ class Groups(Resource):
         info = update_user_privilege("groups", groups_id)
         if info["status"] is False:
             return {"status": False, "message": info["message"]}, 500
+        #完成数据的统一，将project中的组类别删除
+        project_list = group['projects']
+        group_name = group['name']
+        for project in project_list:
+            status, result = db.select("projects","where data -> '$.name'='%s'" % project)
+            project_origion = dict(result[0])
+            group_list = list(project_origion['group'])
+            group_list.remove(group_name)
+            project_origion['group'] = group_list
+            db.update_by_id("projects",json.dumps(project_origion, ensure_ascii=False),project_origion['id'])
+        db.close_mysql()
         return {"status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
@@ -116,12 +133,11 @@ class GroupsList(Resource):
                     for group_project in project["group"]:
                         if group["name"] == group_project:
                             group["projects"].append(project["name"])
+                db.update_by_id("groups", json.dumps(group, ensure_ascii=False), group['id'])
         except Exception as e:
-            logger.info("exception:"+str(e))
+            logger.info("exception:" + str(e))
         db.close_mysql()
         return {"data": group_list, "status": True, "message": ""}, 200
-
-
 
     @access_required(role_dict["product"])
     def post(self):
