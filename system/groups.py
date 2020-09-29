@@ -132,6 +132,7 @@ class GroupsList(Resource):
                 for project in project_list:
                     for group_project in project["group"]:
                         if group["name"] == group_project:
+                            list(group['projects']).clear()
                             group["projects"].append(project["name"])
                 db.update_by_id("groups", json.dumps(group, ensure_ascii=False), group['id'])
         except Exception as e:
