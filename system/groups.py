@@ -128,6 +128,7 @@ class GroupsList(Resource):
         args["id"] = uuid_prefix("g")
         user = g.user_info["username"]
         groups = args
+        groups['projects'] = []
         db = DB()
         status, result = db.select_by_id("product", args["product_id"])
         if status is True:
