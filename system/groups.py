@@ -18,6 +18,7 @@ parser.add_argument("product_id", type=str, required=True, trim=True)
 # 不必填写的字段一定要指定默认值为""，否则无法转换成字典
 parser.add_argument("description", type=str, default="", trim=True)
 parser.add_argument("minion", type=str, default=[], action="append")
+parser.add_argument("projects", type=str, default=[], action="append")
 
 
 class Groups(Resource):
@@ -128,7 +129,6 @@ class GroupsList(Resource):
         args["id"] = uuid_prefix("g")
         user = g.user_info["username"]
         groups = args
-        groups['projects'] = []
         db = DB()
         status, result = db.select_by_id("product", args["product_id"])
         if status is True:
