@@ -97,11 +97,29 @@ class GroupsList(Resource):
         product_id = request.args.get("product_id")
         db = DB()
         status, result = db.select("groups", "where data -> '$.product_id'='%s'" % product_id)
-        db.close_mysql()
         if status is True:
-            return {"data": result, "status": True, "message": ""}, 200
+            group_list = result
         else:
+            db.close_mysql()
             return {"status": False, "message": result}, 500
+
+        status, result = db.select("projects", "where data -> '$.product_id'='%s'" % product_id)
+        if status is True:
+            project_list = result
+        else:
+            db.close_mysql()
+            return {"status": False, "message": result}, 500
+
+        for group in group_list:
+            for project in project_list:
+                for group_project in project["group"]:
+                    if group["name"] == group_project:
+                        group["projects"].append(project["name"])
+
+        db.close_mysql()
+        return {"data": group_list, "status": True, "message": ""}, 200
+
+
 
     @access_required(role_dict["product"])
     def post(self):
