@@ -313,10 +313,13 @@ def get_host_project(host):
     db = DB()
     group_list = db.select('groups', '')
     project_name_list = []
-    for group in group_list:
-        minion_list = list(group['minion'])
-        if minion_list.__contains__(minion_id):
-            project_name_list = project_name_list + group['projects']
+    try:
+        for group in group_list:
+            minion_list = list(group['minion'])
+            if minion_list.__contains__(minion_id):
+                project_name_list = project_name_list + group['projects']
+    except Exception as e:
+        logger.info('Exception:'+str(e))
     return project_name_list
 
 class PingList(Resource):
