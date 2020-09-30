@@ -315,7 +315,9 @@ def get_host_project(host):
     project_name_list = []
     try:
         for group in group_list:
+            logger.info('group:'+str(group))
             minion_list = list(group['minion'])
+            logger.info('minion_list'+str(minion_list))
             if minion_list.__contains__(minion_id):
                 project_name_list = project_name_list + group['projects']
     except Exception as e:
