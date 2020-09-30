@@ -11,7 +11,7 @@ from common.utility import uuid_prefix, salt_api_for_product
 from common.sso import access_required
 import json
 from common.xlsx import Xlsx
-from fileserver.git_fs import gitlab_project
+from fileserver.git_fs import gitlab_project, gitlab_project_name
 from system.user import update_user_privilege, update_user_product
 from common.const import role_dict
 from fileserver.rsync_fs import rsync_config
@@ -265,7 +265,7 @@ class ConfigGenerate(Resource):
         state, result = db.select('projects', "where data -> '$.name'='%s'" % project_name_list[0])
         project_gitlab_name = result[0]['gitlab_name']
         logger.info("project_gitlab_name:"+project_gitlab_name)
-        project, _ = gitlab_project(product_id, project_gitlab_name)
+        project, _ = gitlab_project_name(product_id, project_gitlab_name)
         # 支持的action create, delete, move, update
         branch_name = "master"
         data_create = {
@@ -315,9 +315,7 @@ def get_host_project(host):
     project_name_list = []
     try:
         for group in group_list:
-            logger.info('group:'+str(group))
             minion_list = list(group['minion'])
-            logger.info('minion_list'+str(minion_list))
             if minion_list.__contains__(minion_id):
                 project_name_list = project_name_list + group['projects']
     except Exception as e:
