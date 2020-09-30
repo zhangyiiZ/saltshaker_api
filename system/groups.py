@@ -45,7 +45,7 @@ class Groups(Resource):
             group = result
         else:
             return {"status": False, "message": str(result)}, 500
-        #执行删除
+        # 执行删除
         status, result = db.delete_by_id("groups", groups_id)
 
         if status is not True:
@@ -56,16 +56,16 @@ class Groups(Resource):
         info = update_user_privilege("groups", groups_id)
         if info["status"] is False:
             return {"status": False, "message": info["message"]}, 500
-        #完成数据的统一，将project中的组类别删除
+        # 完成数据的统一，将project中的组类别删除
         project_list = group['projects']
         group_name = group['name']
         for project in project_list:
-            status, result = db.select("projects","where data -> '$.name'='%s'" % project)
+            status, result = db.select("projects", "where data -> '$.name'='%s'" % project)
             project_origion = dict(result[0])
             group_list = list(project_origion['group'])
             group_list.remove(group_name)
             project_origion['group'] = group_list
-            db.update_by_id("projects",json.dumps(project_origion, ensure_ascii=False),project_origion['id'])
+            db.update_by_id("projects", json.dumps(project_origion, ensure_ascii=False), project_origion['id'])
         db.close_mysql()
         return {"status": True, "message": ""}, 200
 
@@ -128,13 +128,7 @@ class GroupsList(Resource):
             db.close_mysql()
             return {"status": False, "message": result}, 500
         try:
-            for group in group_list:
-                for project in project_list:
-                    for group_project in project["group"]:
-                        if group["name"] == group_project:
-                            group['projects'] = []
-                            group["projects"].append(project["name"])
-                db.update_by_id("groups", json.dumps(group, ensure_ascii=False), group['id'])
+            group_list = get_group_project(group_list, project_list, db)
         except Exception as e:
             logger.info("exception:" + str(e))
         db.close_mysql()
@@ -173,6 +167,17 @@ class GroupsList(Resource):
             db.close_mysql()
             logger.error("Select groups name error: %s" % result)
             return {"status": False, "message": result}, 500
+
+
+def get_group_project(group_list, project_list, db):
+    for group in group_list:
+        for project in project_list:
+            for group_project in project["group"]:
+                if group["name"] == group_project:
+                    group['projects'] = []
+                    group["projects"].append(project["name"])
+        db.update_by_id("groups", json.dumps(group, ensure_ascii=False), group['id'])
+    return group_list
 
 
 def group_to_user(gid, uid):

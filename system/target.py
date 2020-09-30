@@ -16,7 +16,6 @@ from system.user import update_user_privilege, update_user_product
 from common.const import role_dict
 from fileserver.rsync_fs import rsync_config
 
-
 logger = loggers()
 
 parser = reqparse.RequestParser()
@@ -169,7 +168,7 @@ class UploadTarget(Resource):
             targets = config_db_result.split(';')
             status, set_repeat = self.get_repeat_target(targets)
             if not status:
-                return {"status": False, "message": "存在重复IP！为："+str(set_repeat)}, 500
+                return {"status": False, "message": "存在重复IP！为：" + str(set_repeat)}, 500
             for i in range(0, len(targets) - 1):
                 target_dic = eval(targets[i])
                 target_dic['host_id'] = host_id
@@ -186,7 +185,7 @@ class UploadTarget(Resource):
             logger.info("close db")
             db.close_mysql()
 
-    def get_repeat_target(self,target_list):
+    def get_repeat_target(self, target_list):
         set_base = set()
         set_repeat = set()
         for i in range(0, len(target_list) - 1):
@@ -228,7 +227,7 @@ class ConfigGenerate(Resource):
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         if state is False:
             return {"status": False, "message": '主机信息未知'}, 500
-        host = result[0]
+        host = dict(result[0])
         product_id = host['product_id']
         minion_id = host['minion_id']
         state, product_result = db.select('product', "where data -> '$.id'='%s'" % product_id)
@@ -257,8 +256,16 @@ class ConfigGenerate(Resource):
                 strresult += " " + str(resdic) + ',\n'
         strresult = strresult[:-1] + '\n]'
         # 上传文件到gitlab中
-
-        project, _ = gitlab_project(product_id, 'state_project')
+        project_name_list = list(get_host_project(host))
+        logger.info('project_name_list'+str(project_name_list))
+        if len(project_name_list) == 0:
+            return {"status": False, "message": '该主机无归属项目'}, 200
+        elif len(project_name_list)>1:
+            return {"status": False, "message": '该主机所属项目不唯一！'+str(project_name_list)}, 200
+        state, result = db.select('projects', "where data -> '$.name'='%s'" % project_name_list[0])
+        project_gitlab_name = result[0]['gitlab_name']
+        logger.info("project_gitlab_name:"+project_gitlab_name)
+        project, _ = gitlab_project(product_id, project_gitlab_name)
         # 支持的action create, delete, move, update
         branch_name = "master"
         data_create = {
@@ -300,6 +307,17 @@ class ConfigGenerate(Resource):
         salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
 
+
+def get_host_project(host):
+    minion_id = host['minion_id']
+    db = DB()
+    group_list = db.select('groups', '')
+    project_name_list = []
+    for group in group_list:
+        minion_list = list(group['minion'])
+        if minion_list.__contains__(minion_id):
+            project_name_list = project_name_list + group['projects']
+    return project_name_list
 
 class PingList(Resource):
     @access_required(role_dict["common_user"])
