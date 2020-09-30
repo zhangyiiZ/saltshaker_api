@@ -311,7 +311,7 @@ class ConfigGenerate(Resource):
 def get_host_project(host):
     minion_id = host['minion_id']
     db = DB()
-    group_list = db.select('groups', '')
+    status, group_list = db.select('groups', '')
     project_name_list = []
     try:
         for group in group_list:
@@ -322,6 +322,7 @@ def get_host_project(host):
                 project_name_list = project_name_list + group['projects']
     except Exception as e:
         logger.info('Exception:'+str(e))
+    db.close_mysql()
     return project_name_list
 
 class PingList(Resource):
