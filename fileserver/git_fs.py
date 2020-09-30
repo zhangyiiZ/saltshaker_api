@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 import gitlab
 from common.db import DB
+from common.log import loggers
 
-
+logger = loggers()
 # GitLab >= 9.0 api_version 请填 4 否则请填 3　使用3 版本 commit api 可能不支持, GitLab >= 8.13 才支持
 def gitlab_project(product_id, project_type):
     db = DB()
@@ -71,6 +72,8 @@ def gitlab_project_name(product_id, project_name):
             # 項目过多会慢
             projects = gl.projects.list(all=True)
             for pr in projects:
+                logger.info("gitlab-contain:"+pr.__dict__.get('_attrs').get('path_with_namespace'))
+                logger.info('project_name:'+project_name)
                 if pr.__dict__.get('_attrs').get('path_with_namespace') == project_name:
                     project = gl.projects.get(pr.__dict__.get('_attrs').get('id'))
                     return project, project_name
