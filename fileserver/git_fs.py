@@ -4,6 +4,8 @@ from common.db import DB
 from common.log import loggers
 
 logger = loggers()
+
+
 # GitLab >= 9.0 api_version 请填 4 否则请填 3　使用3 版本 commit api 可能不支持, GitLab >= 8.13 才支持
 def gitlab_project(product_id, project_type):
     db = DB()
@@ -19,13 +21,16 @@ def gitlab_project(product_id, project_type):
     try:
         if product.get("file_server") == "gitfs":
             gl = gitlab.Gitlab(url=product.get("gitlab_url"),
-                               private_token=None if product.get("private_token") is "" else product.get("private_token"),
+                               private_token=None if product.get("private_token") is "" else product.get(
+                                   "private_token"),
                                oauth_token=None if product.get("oauth_token") is "" else product.get("oauth_token"),
                                email=None if product.get("email") is "" else product.get("email"),
                                password=None if product.get("password") is "" else product.get("password"),
                                ssl_verify=True,
-                               http_username=None if product.get("http_username") is "" else product.get("http_username"),
-                               http_password=None if product.get("http_password") is "" else product.get("http_password"),
+                               http_username=None if product.get("http_username") is "" else product.get(
+                                   "http_username"),
+                               http_password=None if product.get("http_password") is "" else product.get(
+                                   "http_password"),
                                timeout=120,
                                api_version=None if product.get("api_version") is "" else product.get("api_version")
                                )
@@ -43,6 +48,7 @@ def gitlab_project(product_id, project_type):
     except Exception as e:
         return {"status": False, "message": str(e)}
 
+
 def gitlab_project_name(product_id, project_name):
     db = DB()
     status, result = db.select_by_id("product", product_id)
@@ -57,13 +63,16 @@ def gitlab_project_name(product_id, project_name):
     try:
         if product.get("file_server") == "gitfs":
             gl = gitlab.Gitlab(url=product.get("gitlab_url"),
-                               private_token=None if product.get("private_token") is "" else product.get("private_token"),
+                               private_token=None if product.get("private_token") is "" else product.get(
+                                   "private_token"),
                                oauth_token=None if product.get("oauth_token") is "" else product.get("oauth_token"),
                                email=None if product.get("email") is "" else product.get("email"),
                                password=None if product.get("password") is "" else product.get("password"),
                                ssl_verify=True,
-                               http_username=None if product.get("http_username") is "" else product.get("http_username"),
-                               http_password=None if product.get("http_password") is "" else product.get("http_password"),
+                               http_username=None if product.get("http_username") is "" else product.get(
+                                   "http_username"),
+                               http_password=None if product.get("http_password") is "" else product.get(
+                                   "http_password"),
                                timeout=120,
                                api_version=None if product.get("api_version") is "" else product.get("api_version")
                                )
@@ -72,9 +81,9 @@ def gitlab_project_name(product_id, project_name):
             # 項目过多会慢
             projects = gl.projects.list(all=True)
             for pr in projects:
-                logger.info("gitlab-contain:"+pr.__dict__.get('_attrs').get('path_with_namespace'))
-                logger.info('project_name:'+project_name)
-                if pr.__dict__.get('_attrs').get('path_with_namespace') == project_name:
+                logger.info("gitlab-contain:" + pr.__dict__.get('_attrs').get('path_with_namespace'))
+                logger.info('project_name:' + project_name)
+                if str(pr.__dict__.get('_attrs').get('path_with_namespace')).replace('root/', '') == project_name:
                     project = gl.projects.get(pr.__dict__.get('_attrs').get('id'))
                     return project, project_name
             return {"status": False, "message": "Project not found"}, ""
