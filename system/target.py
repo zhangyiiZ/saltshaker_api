@@ -303,7 +303,7 @@ class ConfigGenerate(Resource):
         logger.info('minion_id:' + minion_id)
         salt_api.shell_remote_execution(minion_id, command_path)
         command = 'cd /tmp/'+project_gitlab_name+' \n git pull \n'+command
-        logger.info('command' + command)
+        logger.info('command:' + command)
         salt_api.shell_remote_execution(master_id, command)
         return {"status": True, "message": '配置发送成功'}, 200
 
