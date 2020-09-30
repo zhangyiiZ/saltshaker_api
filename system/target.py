@@ -258,9 +258,6 @@ class ConfigGenerate(Resource):
         strresult = strresult[:-1] + '\n]'
         # 上传文件到gitlab中
 
-
-
-
         project, _ = gitlab_project(product_id, 'state_project')
         # 支持的action create, delete, move, update
         branch_name = "master"

@@ -189,3 +189,18 @@ def group_to_user(gid, uid):
     else:
         logger.error("Group to user error: %s" % result)
         return {"status": False, "message": result}
+
+
+class GroupsListForTarget(Resource):
+    @access_required(role_dict["common_user"])
+    def get(self):
+        logger.info("GroupsListForTarget")
+        db = DB()
+        status, result = db.select("groups", "")
+        if status is True:
+            group_list = result
+        else:
+            db.close_mysql()
+            return {"status": False, "message": result}, 500
+        db.close_mysql()
+        return {"data": group_list, "status": True, "message": ""}, 200

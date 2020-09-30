@@ -11,7 +11,7 @@ from system.target import TargetList, Target, UploadTarget, ConfigGenerate, Ping
 from system.user import UserList, User, Register, ResetPassword, ResetPasswordByOwner, ChangeUserInfo
 from system.login import Login
 from system.acl import ACLList, ACL
-from system.groups import GroupsList, Groups
+from system.groups import GroupsList, Groups, GroupsListForTarget
 from system.host import HostList, Host, HostListForTarget
 from resources.log import LogList
 from resources.cherry_stats import CherryStats
@@ -64,6 +64,7 @@ api.add_resource(ChangeUserInfo, "/saltshaker/api/v1.0/user/change/<string:user_
 
 # groups
 api.add_resource(GroupsList, "/saltshaker/api/v1.0/groups")
+api.add_resource(GroupsListForTarget, "/saltshaker/api/v1.0/groups/target")
 api.add_resource(Groups, "/saltshaker/api/v1.0/groups/<string:groups_id>")
 
 # host
