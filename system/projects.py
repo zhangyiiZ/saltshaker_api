@@ -88,9 +88,9 @@ class Projects(Resource):
 class ProjectsList(Resource):
     @access_required(role_dict["product"])
     def get(self):
-        product_id = request.args.get("product_id")
+        #product_id = request.args.get("product_id")
         db = DB()
-        status, result = db.select("projects", "where data -> '$.product_id'='%s'" % product_id)
+        status, result = db.select("projects", '')
         db.close_mysql()
         if status is True:
             return {"data": result, "status": True, "message": ""}, 200
