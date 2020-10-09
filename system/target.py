@@ -169,7 +169,7 @@ class UploadTarget(Resource):
             status, set_repeat = self.get_repeat_target(targets)
             if not status:
                 logger.info('存在重复IP')
-                return {"status": False, "message": "存在重复IP！为：" + str(set_repeat)}, 500
+                return {"status": True, "message": "存在重复IP！为：" + str(set_repeat)}, 500
             for i in range(0, len(targets) - 1):
                 target_dic = eval(targets[i])
                 target_dic['host_id'] = host_id
