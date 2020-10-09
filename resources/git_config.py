@@ -154,6 +154,7 @@ class UploadConfig(Resource):
     def post(self):
         args = parser.parse_args()
         project, product_name = get_gitlab_project(args["project_id"], args["product_id"])
+        logger.info("111")
         logger.info('project:'+str(product_name))
         file = request.files['file']
         if args["path"]:
