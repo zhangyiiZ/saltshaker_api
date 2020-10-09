@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 import flask_restful
+
+from resources.git_config import BranchListConfig
 from resources.minions import MinionsKeys, MinionsStatus, MinionsGrains, MinionsGrainsList
 from resources.job import Job, JobList, JobManager
 from resources.event import Event, EventList
@@ -154,6 +156,7 @@ api.add_resource(ConfigGroups, "/saltshaker/api/v1.0/config/group")
 api.add_resource(ConfigHosts, "/saltshaker/api/v1.0/config/host")
 api.add_resource(Distribute, "/saltshaker/api/v1.0/config/distribute")
 api.add_resource(Synchronize, "/saltshaker/api/v1.0/config/synchronize")
+api.add_resource(BranchListConfig, "/saltshaker/api/v1.0/config/branch")
 
 #project
 api.add_resource(ProjectsList, "/saltshaker/api/v1.0/projects")

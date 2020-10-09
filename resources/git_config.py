@@ -2,7 +2,7 @@
 from flask_restful import Resource, reqparse, request
 
 from common.db import DB
-from fileserver.git_fs import gitlab_project
+from fileserver.git_fs import gitlab_project, gitlab_project_name
 from common.const import role_dict
 from common.log import loggers
 from common.sso import access_required
@@ -15,6 +15,7 @@ logger = loggers()
 
 parser = reqparse.RequestParser()
 parser.add_argument("product_id", type=str, required=True, trim=True)
+parser.add_argument("project_id", type=str, required=True, trim=True)
 parser.add_argument("branch", type=str, default="master", trim=True)
 parser.add_argument("path", type=str, default="", trim=True)
 parser.add_argument("project_type", type=str, required=True, trim=True)
@@ -27,7 +28,12 @@ class BranchListConfig(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
         args = parser.parse_args()
-        project, _ = gitlab_project(args["product_id"], args["project_type"])
+        db = DB()
+        logger.info("project_id:"+args["project_id"]+' '+args["product_id"])
+        status, result = db.select_by_id('projects',args["project_id"])
+        project_gitlab_name = result[0]['gitlab_name']
+        db.close_mysql()
+        project, _ = gitlab_project_name(args["product_id"], project_gitlab_name)
         if isinstance(project, dict):
             return project, 500
         else:
