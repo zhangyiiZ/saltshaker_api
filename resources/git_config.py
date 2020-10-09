@@ -30,7 +30,7 @@ class BranchListConfig(Resource):
         db = DB()
         logger.info("project_id:"+args["project_id"]+' '+args["product_id"])
         status, result = db.select_by_id('projects',args["project_id"])
-        project_gitlab_name = result[0]['gitlab_name']
+        project_gitlab_name = result['gitlab_name']
         logger.info("project_gitlab_name:"+project_gitlab_name)
         db.close_mysql()
         project, _ = gitlab_project_name(args["product_id"], project_gitlab_name)
