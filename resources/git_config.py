@@ -18,7 +18,6 @@ parser.add_argument("product_id", type=str, required=True, trim=True)
 parser.add_argument("project_id", type=str, required=True, trim=True)
 parser.add_argument("branch", type=str, default="master", trim=True)
 parser.add_argument("path", type=str, default="", trim=True)
-parser.add_argument("project_type", type=str, required=True, trim=True)
 parser.add_argument("action", type=str, default="", trim=True)
 parser.add_argument("content", type=str, default="", trim=True)
 
