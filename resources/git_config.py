@@ -27,11 +27,7 @@ class BranchListConfig(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
         args = parser.parse_args()
-        db = DB()
-        status, result = db.select_by_id('projects',args["project_id"])
-        project_gitlab_name = result['gitlab_name']
-        db.close_mysql()
-        project, _ = gitlab_project_name(args["product_id"], project_gitlab_name)
+        project, product_name = get_gitlab_project(args["project_id"],args["product_id"])
         if isinstance(project, dict):
             return project, 500
         else:
@@ -46,16 +42,13 @@ class BranchListConfig(Resource):
             return {"data": branch_list, "status": True, "message": ""}, 200
 
 
+
 # 获取目录结构
 class FilesListConfig(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
         args = parser.parse_args()
-        db = DB()
-        status, result = db.select_by_id('projects', args["project_id"])
-        project_gitlab_name = result['gitlab_name']
-        db.close_mysql()
-        project, product_name = gitlab_project_name(args["product_id"], project_gitlab_name)
+        project, product_name = get_gitlab_project(args["project_id"], args["product_id"])
         if isinstance(project, dict):
             return project, 500
         else:
@@ -108,7 +101,7 @@ class FileContentConfig(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
         args = parser.parse_args()
-        project, _ = gitlab_project(args["product_id"], args["project_type"])
+        project, product_name = get_gitlab_project(args["project_id"], args["product_id"])
         if isinstance(project, dict):
             return project, 500
         else:
@@ -127,7 +120,7 @@ class CommitConfig(Resource):
     def post(self):
         args = parser.parse_args()
         user = g.user_info["username"]
-        project, _ = gitlab_project(args["product_id"], args["project_type"])
+        project, product_name = get_gitlab_project(args["project_id"], args["product_id"])
         # 支持的action create, delete, move, update
         data = {
             'branch': args["branch"],
@@ -161,7 +154,7 @@ class UploadConfig(Resource):
     def post(self):
         args = parser.parse_args()
         user = g.user_info["username"]
-        project, _ = gitlab_project(args["product_id"], args["project_type"])
+        project, product_name = get_gitlab_project(args["project_id"], args["product_id"])
         file = request.files['file']
         logger.info("firename:" + file.filename + "product_id:" + args["product_id"] + "project_type:" + args[
             "project_type"] + "branch:" + args["branch"] + "path:" + args["path"])
@@ -196,4 +189,10 @@ class UploadConfig(Resource):
             return {"status": True, "message": ""}, 200
 
 
-
+def get_gitlab_project(project_id,product_id):
+    db = DB()
+    status, result = db.select_by_id('projects', project_id)
+    project_gitlab_name = result['gitlab_name']
+    db.close_mysql()
+    project, product_name = gitlab_project_name(product_id, project_gitlab_name)
+    return project, product_name
