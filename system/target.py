@@ -168,6 +168,7 @@ class UploadTarget(Resource):
             targets = config_db_result.split(';')
             status, set_repeat = self.get_repeat_target(targets)
             if not status:
+                logger.info('存在重复IP')
                 return {"status": False, "message": "存在重复IP！为：" + str(set_repeat)}, 500
             for i in range(0, len(targets) - 1):
                 target_dic = eval(targets[i])
@@ -180,6 +181,7 @@ class UploadTarget(Resource):
                     return {"status": False, "message": insert_result}, 500
             return {"status": True, "message": ""}, 200
         except Exception as e:
+            logger.info('error:'+str(e))
             return {"status": False, "message": str(e)}, 500
         finally:
             logger.info("close db")
