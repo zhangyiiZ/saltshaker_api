@@ -28,10 +28,8 @@ class BranchListConfig(Resource):
     def get(self):
         args = parser.parse_args()
         db = DB()
-        logger.info("project_id:"+args["project_id"]+' '+args["product_id"])
         status, result = db.select_by_id('projects',args["project_id"])
         project_gitlab_name = result['gitlab_name']
-        logger.info("project_gitlab_name:"+project_gitlab_name)
         db.close_mysql()
         project, _ = gitlab_project_name(args["product_id"], project_gitlab_name)
         if isinstance(project, dict):
@@ -53,7 +51,11 @@ class FilesListConfig(Resource):
     @access_required(role_dict["common_user"])
     def get(self):
         args = parser.parse_args()
-        project, product_name = gitlab_project(args["product_id"], args["project_type"])
+        db = DB()
+        status, result = db.select_by_id('projects', args["project_id"])
+        project_gitlab_name = result['gitlab_name']
+        db.close_mysql()
+        project, product_name = gitlab_project_name(args["product_id"], project_gitlab_name)
         if isinstance(project, dict):
             return project, 500
         else:
