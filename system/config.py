@@ -10,6 +10,8 @@ logger = loggers()
 parser = reqparse.RequestParser()
 parser.add_argument("desc_path", type=str, required=True, trim=True)
 parser.add_argument("file_path", type=str, default='', trim=True)
+parser.add_argument("product_id", type=str, default='', trim=True)
+parser.add_argument("project_id", type=str, default='', trim=True)
 parser.add_argument("target", type=str, required=True, action="append")
 
 
@@ -45,11 +47,13 @@ class Distribute(Resource):
                 return {"status": False, "message": 'select group error'}, 500
         logger.info("target_minion_list:" + str(target_minion_list))
 
-        state, result = db.select('product', "where data -> '$.name'='%s'" % 'config')
-        product_config_id = result[0]['id']
-        master_id = result[0]['salt_master_id']
-        salt_api = salt_api_for_product(product_config_id)
-        source_path = '/tmp/config/' + file_path
+        state, product_result = db.select_by_id('product', args["product_id"])
+        master_id = product_result['salt_master_id']
+        salt_api = salt_api_for_product(args['product_id'])
+        state, project_result = db.select_by_id('projects', args["project_id"])
+        project_name = project_result["gitlab_name"]
+        logger.info("project_name:" + project_name)
+        source_path = '/tmp/' + project_name + '/' + file_path
         for minion_id in target_minion_list:
             command_path = 'mkdir -p ' + desc_path
             salt_api.shell_remote_execution(minion_id, command_path)
