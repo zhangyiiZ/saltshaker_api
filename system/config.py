@@ -58,7 +58,7 @@ class Distribute(Resource):
             command_path = 'mkdir -p ' + desc_path
             salt_api.shell_remote_execution(minion_id, command_path)
             command_distribute = 'salt-cp ' + minion_id + ' ' + source_path + ' ' + desc_path
-            command = 'cd /tmp/config \n git pull \n' + command_distribute
+            command = 'cd /tmp/'+project_name+'/ \n'+'git pull \n' + command_distribute
             salt_api.shell_remote_execution(master_id, command)
         db.close_mysql()
         return {"status": True, "message": 'success'}, 200
