@@ -237,10 +237,6 @@ class ConfigGenerate(Resource):
         product_name = product_host['name']
         master_id = product_host['salt_master_id']
         salt_api = salt_api_for_product(product_id)
-        # 完成命令拼装
-        source = '/tmp/config/' + minion_id + '/' + file_name
-        dest = path_str
-        command = 'salt-cp ' + minion_id + ' ' + source + ' ' + dest
         # 完成关键词搜索的文件的生成
         status, result = db.select("target", "where data -> '$.host_id'='%s'" % host_id)
         if status is True:
@@ -268,6 +264,10 @@ class ConfigGenerate(Resource):
         project_gitlab_name = result[0]['gitlab_name']
         logger.info("project_gitlab_name:"+project_gitlab_name)
         project, _ = gitlab_project_name(product_id, project_gitlab_name)
+        # 完成命令拼装
+        source = '/tmp/'+project_gitlab_name+'/' + minion_id + '/' + file_name
+        dest = path_str
+        command = 'salt-cp ' + minion_id + ' ' + source + ' ' + dest
         # 支持的action create, delete, move, update
         branch_name = "master"
         data_create = {
