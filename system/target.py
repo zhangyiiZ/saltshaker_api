@@ -181,7 +181,7 @@ class UploadTarget(Resource):
                     return {"status": False, "message": insert_result}, 500
             return {"status": True, "message": ""}, 200
         except Exception as e:
-            logger.info('error:'+str(e))
+            logger.info('error:' + str(e))
             return {"status": False, "message": str(e)}, 500
         finally:
             logger.info("close db")
@@ -255,19 +255,20 @@ class ConfigGenerate(Resource):
         strresult = strresult[:-1] + '\n]'
         # 上传文件到gitlab中
         project_name_list = list(get_host_project(host))
-        logger.info('project_name_list'+str(project_name_list))
+        logger.info('project_name_list' + str(project_name_list))
         if len(project_name_list) == 0:
             return {"status": False, "message": '该主机无归属项目'}, 200
-        elif len(project_name_list)>1:
-            return {"status": False, "message": '该主机所属项目不唯一！'+str(project_name_list)}, 200
+        elif len(project_name_list) > 1:
+            return {"status": False, "message": '该主机所属项目不唯一！' + str(project_name_list)}, 200
         state, result = db.select('projects', "where data -> '$.name'='%s'" % project_name_list[0])
         project_gitlab_name = result[0]['gitlab_name']
-        logger.info("project_gitlab_name:"+project_gitlab_name)
+        logger.info("project_gitlab_name:" + project_gitlab_name)
         project, _ = gitlab_project_name(product_id, project_gitlab_name)
         # 完成命令拼装
-        source = '/tmp/'+project_gitlab_name+'/' + minion_id + '/' + file_name
+        source = '/tmp/' + project_gitlab_name + '/' + minion_id + '/' + file_name
+        source_tmp = '/tmp/' + project_gitlab_name + '/' + minion_id + '/tmp_file'
         dest = path_str
-        command = 'salt-cp ' + minion_id + ' ' + source + ' ' + dest
+        command = 'salt-cp ' + minion_id + ' ' + source_tmp + ' ' + dest
         # 支持的action create, delete, move, update
         branch_name = "master"
         data_create = {
@@ -304,9 +305,16 @@ class ConfigGenerate(Resource):
         command_path = 'mkdir -p ' + path_str
         logger.info('minion_id:' + minion_id)
         salt_api.shell_remote_execution(minion_id, command_path)
-        command = 'cd /tmp/'+project_gitlab_name+' \n git pull \n'+command
-        logger.info('command:' + command)
-        salt_api.shell_remote_execution(master_id, command)
+        # 因为传输中名称需要中文，故使用中间文件
+        command_list = []
+        command_list.append('cd /tmp/' + project_gitlab_name + ' \n')
+        command_list.append('git pull \n')
+        command_list.append('cp ' + source + ' ' + source_tmp)
+        command_list.append(command)
+        command_list.append('rm -f '+source_tmp)
+        command_final = ''.join(command_list)
+        logger.info('command:' + command_final)
+        salt_api.shell_remote_execution(master_id, command_final)
         return {"status": True, "message": '配置发送成功'}, 200
 
 
@@ -321,9 +329,10 @@ def get_host_project(host):
             if minion_list.__contains__(minion_id):
                 project_name_list = project_name_list + group['projects']
     except Exception as e:
-        logger.info('Exception:'+str(e))
+        logger.info('Exception:' + str(e))
     db.close_mysql()
     return project_name_list
+
 
 class PingList(Resource):
     @access_required(role_dict["common_user"])
