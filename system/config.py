@@ -53,15 +53,30 @@ class Distribute(Resource):
         state, project_result = db.select_by_id('projects', args["project_id"])
         project_name = project_result["gitlab_name"]
         logger.info("project_name:" + project_name)
+        file_path_list = str(file_path).rsplit('/',1)
         source_path = '/tmp/' + project_name + '/' + file_path
+        source_path_tmp = '/tmp/' + project_name + '/' + file_path_list[0]+ '/tmp_file'
+        no_success_minion_list = []
         for minion_id in target_minion_list:
             command_path = 'mkdir -p ' + desc_path
             salt_api.shell_remote_execution(minion_id, command_path)
-            command_distribute = 'salt-cp ' + minion_id + ' ' + source_path + ' ' + desc_path
-            command = 'cd /tmp/'+project_name+'/ \n'+'git pull \n' + command_distribute
-            salt_api.shell_remote_execution(master_id, command)
+            command_distribute = 'salt-cp ' + minion_id + ' ' + source_path_tmp + ' ' + desc_path
+            command_list = []
+            command_list.append('cd /tmp/' + project_name + ' \n ')
+            command_list.append('git pull \n ')
+            command_list.append('cp ' + source_path + ' ' + source_path_tmp + ' \n ')
+            command_list.append(command_distribute + ' \n ')
+            command_list.append('rm -f ' + source_path_tmp + ' \n ')
+            command_final = ''.join(command_list)
+            result = salt_api.shell_remote_execution([master_id], command_final)
+            if not str(result).__contains__('True'):
+                no_success_minion_list.append(minion_id)
         db.close_mysql()
-        return {"status": True, "message": 'success'}, 200
+        if len(no_success_minion_list)==0:
+            return {"status": True, "message": 'success'}, 200
+        else:
+            return {"status": False, "message": '没有成功发送的节点有:'+str(no_success_minion_list)}, 500
+
 
 
 # 获得所有的主机

@@ -170,7 +170,7 @@ class UploadTarget(Resource):
             if len(exist_ip_list)==0:
                 return {"status": True, "message": ""}, 200
             else:
-                return {"status": False, "message": "表格中有已经存在的IP："+str(exist_ip_list)+'其余IP已经添加完成'}, 200
+                return {"status": False, "message": "表格中有已经存在的IP："+str(exist_ip_list)+',其余IP已经添加完成'}, 200
         except Exception as e:
             logger.info('error:' + str(e))
             return {"status": False, "message": str(e)}, 200
