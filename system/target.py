@@ -76,14 +76,9 @@ class Target(Resource):
         logger.info('id:' + target_id)
         target = args
         db = DB()
-        status, result = db.select("target", "where data -> '$.IP'='%s' AND data -> '$.host_id'='%s'" % (
-            args["IP"], args['host_id']))
+        status, message = judge_target_IP_exist(args['IP'], args['host_id'])
         if status is not True:
-            return {"status": False, "message": "system select error"}, 500
-        else:
-            if len(result) != 0:
-                db.close_mysql()
-                return {"status": False, "message": "The target already exists"}, 500
+            return {"status": False, "message": message}, 500
         status, result = db.update_by_id("target", json.dumps(target, ensure_ascii=False), target_id)
         db.close_mysql()
         if status is not True:
@@ -114,25 +109,30 @@ class TargetList(Resource):
         args["id"] = uuid_prefix("t")
         target = args
         db = DB()
-        status, result = db.select("target", "where data -> '$.IP'='%s' AND data -> '$.host_id'='%s'" % (
-            args["IP"], args['host_id']))
+        status, message = judge_target_IP_exist(args['IP'],args['host_id'])
         if status is True:
-            if len(result) == 0:
-                logger.info('tag1')
-                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-                if insert_status is not True:
-                    logger.error("Add target error: %s" % insert_result)
-                    db.close_mysql()
-                    return {"status": False, "message": insert_result}, 500
-            else:
+            insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
+            if insert_status is not True:
                 db.close_mysql()
-                return {"status": False, "message": "target already exists"}, 500
+                return {"status": False, "message": str(insert_result)}, 500
         else:
             db.close_mysql()
-            return {"status": False, "message": result}, 500
+            return {"status": False, "message": message}, 500
         db.close_mysql()
-        return {"status": True, "message": result}, 200
+        return {"status": True, "message": message}, 200
 
+
+def judge_target_IP_exist(IP, host_id):
+    db = DB()
+    status, result = db.select("target", "where data -> '$.IP'='%s' AND data -> '$.host_id'='%s'" % (
+        IP, host_id))
+    if status is not True:
+        return False, 'select error'
+    else:
+        if len(result) == 0:
+            return True, ''
+        else:
+            return False, 'IP already exists'
 
 # 上传文件
 class UploadTarget(Resource):
@@ -153,16 +153,24 @@ class UploadTarget(Resource):
             if not status:
                 logger.info('存在重复IP')
                 return {"status": True, "message": "存在重复IP！为：" + str(set_repeat)}, 200
+            exist_ip_list = []
             for i in range(0, len(targets) - 1):
                 target_dic = eval(targets[i])
                 target_dic['host_id'] = host_id
                 target_dic['id'] = uuid_prefix('t')
                 logger.info(str(target_dic))
-                insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
-                if insert_status is not True:
-                    logger.error("error:" + insert_result)
-                    return {"status": False, "message": insert_result}, 500
-            return {"status": True, "message": ""}, 200
+                status, message = judge_target_IP_exist(target_dic['IP'],host_id)
+                if status:
+                    insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
+                    if insert_status is not True:
+                        logger.error("error:" + insert_result)
+                        return {"status": False, "message": insert_result}, 500
+                else:
+                    exist_ip_list.append(target_dic['IP'])
+            if len(exist_ip_list)==0:
+                return {"status": True, "message": ""}, 200
+            else:
+                return {"status": False, "message": "表格中有已经存在的IP："+str(exist_ip_list)+'其余IP已经添加完成'}, 500
         except Exception as e:
             logger.info('error:' + str(e))
             return {"status": False, "message": str(e)}, 500
