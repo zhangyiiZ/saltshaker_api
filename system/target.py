@@ -411,7 +411,7 @@ class TruncateTarget(Resource):
         args = parser.parse_args()
         host_id = args['host_id']
         db = DB()
-        state, result = db.delete('targets', "where data -> '$.host_id'='%s'" % host_id)
+        state, result = db.delete('target', "where data -> '$.host_id'='%s'" % host_id)
         if state:
             return {"status": True, "message": '成功'},200
         else: return {"status": False, "message": '删除失败'},500
