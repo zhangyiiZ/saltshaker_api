@@ -233,8 +233,9 @@ class ConfigGenerate(Resource):
         product_id = host['product_id']
         minion_id = host['minion_id']
         state, product_result = db.select('product', "where data -> '$.id'='%s'" % product_id)
+        if state is False:
+            return {"status": False, "message": 'product未知'}, 500
         product_host = product_result[0]
-        product_name = product_host['name']
         master_id = product_host['salt_master_id']
         salt_api = salt_api_for_product(product_id)
         # 完成关键词搜索的文件的生成
@@ -244,15 +245,19 @@ class ConfigGenerate(Resource):
         else:
             db.close_mysql()
             return {"status": False, "message": result}, 500
-        strresult = '[\n'
-        for target in target_list:
-            model = str(target['model'])
-            if model.__contains__(key_word):
-                target_str = target.pop('target')
-                del target['host_id']
-                resdic = {"targets": [target_str], "labels": target}
-                strresult += " " + str(resdic) + ',\n'
-        strresult = strresult[:-1] + '\n]'
+        try:
+            strresult = '[\n'
+            for target in target_list:
+                model = str(target['model'])
+                if model.__contains__(key_word):
+                    target_str = target.pop('target')
+                    del target['host_id']
+                    resdic = {"targets": [target_str], "labels": target}
+                    strresult += " " + str(resdic) + ',\n'
+            strresult = strresult[:-1] + '\n]'
+        except Exception as e:
+            return {"status": False, "message": '监控目标信息解析出错'}, 500
+
         # 上传文件到gitlab中
         project_name_list = list(get_host_project(host))
         logger.info('project_name_list' + str(project_name_list))
@@ -314,7 +319,11 @@ class ConfigGenerate(Resource):
         command_list.append('rm -f ' + source_tmp + ' \n ')
         command_final = ''.join(command_list)
         logger.info('command:' + command_final)
-        salt_api.shell_remote_execution(master_id, command_final)
+        result = salt_api.shell_remote_execution(master_id, command_final)
+        logger.info("result:"+str(result))
+        # for k, v in result.items():
+        #     if not v:
+        #         return {"status": False, "message": '配置发送失败:'+}, 200
         return {"status": True, "message": '配置发送成功'}, 200
 
 
