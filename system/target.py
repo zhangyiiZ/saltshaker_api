@@ -86,12 +86,12 @@ class Target(Resource):
             db.close_mysql()
             return {"status": False, "message": "%s does not exist" % target_id}, 404
         # 判断名字是否重复
-        status, result = db.select("target", "where data -> '$.name'='%s'" % args["target"])
+        status, result = db.select("target", "where data -> '$.IP'='%s' AND data -> '$.host_id'='%s'" % (
+            args["IP"], args['host_id']))
         if status is True:
-            if result:
-                if target_id != result[0].get("id"):
-                    db.close_mysql()
-                    return {"status": False, "message": "The target already exists"}, 500
+            if len(result) != 0:
+                db.close_mysql()
+                return {"status": False, "message": "The target already exists"}, 500
         status, result = db.update_by_id("target", json.dumps(target, ensure_ascii=False), target_id)
         db.close_mysql()
         if status is not True:
@@ -122,7 +122,8 @@ class TargetList(Resource):
         args["id"] = uuid_prefix("t")
         target = args
         db = DB()
-        status, result = db.select("target", "where data -> '$.target'='%s' AND data -> '$.host_id'='%s'" % (args["target"],args['host_id']))
+        status, result = db.select("target", "where data -> '$.IP'='%s' AND data -> '$.host_id'='%s'" % (
+            args["IP"], args['host_id']))
         if status is True:
             if len(result) == 0:
                 logger.info('tag1')
@@ -391,7 +392,7 @@ class SinglePing(Resource):
         else:
             response_data['status'] = "设备正常"
         response_data['sysDescr'] = str(sysDescr[minion_id])
-        return {"status": True, "message": '成功', "data": response_data},200
+        return {"status": True, "message": '成功', "data": response_data}, 200
 
 
 class TruncateTarget(Resource):
@@ -403,7 +404,6 @@ class TruncateTarget(Resource):
         db = DB()
         state, result = db.delete('target', "where data -> '$.host_id'='%s'" % host_id)
         if state:
-            return {"status": True, "message": '成功'},200
-        else: return {"status": False, "message": '删除失败'},500
-
-
+            return {"status": True, "message": '成功'}, 200
+        else:
+            return {"status": False, "message": '删除失败'}, 500
