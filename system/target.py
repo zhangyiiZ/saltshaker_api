@@ -76,19 +76,11 @@ class Target(Resource):
         logger.info('id:' + target_id)
         target = args
         db = DB()
-        # 判断是否存在
-        select_status, select_result = db.select_by_id("target", target_id)
-        if select_status is not True:
-            db.close_mysql()
-            logger.error("Modify target error: %s" % select_result)
-            return {"status": False, "message": select_result}, 500
-        if not select_result:
-            db.close_mysql()
-            return {"status": False, "message": "%s does not exist" % target_id}, 404
-        # 判断名字是否重复
         status, result = db.select("target", "where data -> '$.IP'='%s' AND data -> '$.host_id'='%s'" % (
             args["IP"], args['host_id']))
-        if status is True:
+        if status is not True:
+            return {"status": False, "message": "system select error"}, 500
+        else:
             if len(result) != 0:
                 db.close_mysql()
                 return {"status": False, "message": "The target already exists"}, 500
