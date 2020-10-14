@@ -320,6 +320,7 @@ class ConfigGenerate(Resource):
         command_final = ''.join(command_list)
         logger.info('command:' + command_final)
         result = salt_api.shell_remote_execution([master_id], command_final)
+        logger.info('result:'+ str(result))
         if str(result).__contains__('True'):
             return {"status": True, "message": '配置发送成功'}, 200
         else:
