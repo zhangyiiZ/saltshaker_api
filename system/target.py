@@ -267,7 +267,7 @@ class ConfigGenerate(Resource):
         # 完成命令拼装
         source = '/tmp/' + project_gitlab_name + '/' + minion_id + '/' + file_name
         source_tmp = '/tmp/' + project_gitlab_name + '/' + minion_id + '/tmp_file'
-        dest = path_str
+        dest = path_str + file_name
         command = 'salt-cp ' + minion_id + ' ' + source_tmp + ' ' + dest
         # 支持的action create, delete, move, update
         branch_name = "master"
