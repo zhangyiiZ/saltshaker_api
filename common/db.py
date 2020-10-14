@@ -89,6 +89,18 @@ class DB(object):
             self.conn.rollback()
             return False, str(e)
 
+    def delete(self, table, arg):
+        sql = "DELETE FROM %s %s" % (table, arg)
+        logger.info(sql)
+        try:
+            self.cursor.execute(sql)
+            self.conn.commit()
+            return True, self.cursor.rowcount
+        except Exception as e:
+            logger.error("Delete error: %s" % e)
+            self.conn.rollback()
+            return False, str(e)
+
     def update_by_id(self, table, data, id):
         sql = "UPDATE %s SET data='%s' WHERE data -> '$.id'='%s'" % (table, data.replace("'", r"\'").
                                                                      replace(r"\n", r'\\n').replace(r'\"', r'').

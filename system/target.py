@@ -320,7 +320,7 @@ class ConfigGenerate(Resource):
         command_final = ''.join(command_list)
         logger.info('command:' + command_final)
         result = salt_api.shell_remote_execution([master_id], command_final)
-        logger.info('result:'+ str(result))
+        logger.info('result:' + str(result))
         if str(result).__contains__('True'):
             return {"status": True, "message": '配置发送成功'}, 200
         else:
@@ -401,4 +401,19 @@ class SinglePing(Resource):
         else:
             response_data['status'] = "设备正常"
         response_data['sysDescr'] = str(sysDescr[minion_id])
-        return {"status": True, "message": '成功', "data": response_data}
+        return {"status": True, "message": '成功', "data": response_data},200
+
+
+class TruncateTarget(Resource):
+    @access_required(role_dict["common_user"])
+    def post(self):
+        logger.info("TruncateTarget")
+        args = parser.parse_args()
+        host_id = args['host_id']
+        db = DB()
+        state, result = db.delete('targets', "where data -> '$.host_id'='%s'" % host_id)
+        if state:
+            return {"status": True, "message": '成功'},200
+        else: return {"status": False, "message": '删除失败'},500
+
+

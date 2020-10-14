@@ -9,7 +9,7 @@ from system.config import ConfigGroups, Distribute, Synchronize, ConfigHosts
 from system.product import ProductList, Product, ProductCheck, ProductListConfig
 from system.projects import ProjectsList, Projects
 from system.role import RoleList, Role
-from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList, SinglePing
+from system.target import TargetList, Target, UploadTarget, ConfigGenerate, PingList, SinglePing, TruncateTarget
 from system.user import UserList, User, Register, ResetPassword, ResetPasswordByOwner, ChangeUserInfo
 from system.login import Login
 from system.acl import ACLList, ACL
@@ -150,6 +150,7 @@ api.add_resource(UploadTarget, "/saltshaker/api/v1.0/target/upload")
 api.add_resource(ConfigGenerate, "/saltshaker/api/v1.0/target/config")
 api.add_resource(PingList, "/saltshaker/api/v1.0/target/ping")
 api.add_resource(SinglePing, "/saltshaker/api/v1.0/target/single")
+api.add_resource(TruncateTarget, "/saltshaker/api/v1.0/target/truncate")
 
 #config
 api.add_resource(ConfigGroups, "/saltshaker/api/v1.0/config/group")
