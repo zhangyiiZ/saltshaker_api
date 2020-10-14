@@ -122,11 +122,6 @@ class TargetList(Resource):
         args["id"] = uuid_prefix("t")
         target = args
         db = DB()
-        host_id = args['host_id']
-        insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-        if insert_status is not True:
-            db.close_mysql()
-            return {"status": False, "message": insert_result}, 500
         status, result = db.select("target", "where data -> '$.target'='%s' AND data -> '$.host_id'='%s'" % (args["target"],args['host_id']))
         if status is True:
             if len(result) == 0:
