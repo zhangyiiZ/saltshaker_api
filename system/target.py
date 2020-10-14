@@ -91,7 +91,7 @@ class Target(Resource):
             if result:
                 if target_id != result[0].get("id"):
                     db.close_mysql()
-                    return {"status": False, "message": "The target already exists"}, 200
+                    return {"status": False, "message": "The target already exists"}, 500
         status, result = db.update_by_id("target", json.dumps(target, ensure_ascii=False), target_id)
         db.close_mysql()
         if status is not True:
@@ -127,15 +127,10 @@ class TargetList(Resource):
         if insert_status is not True:
             db.close_mysql()
             return {"status": False, "message": insert_result}, 500
-        status, result = db.select("target", "where data -> '$.target'='%s'" % args["target"])
+        status, result = db.select("target", "where data -> '$.target'='%s' AND data -> '$.host_id'='%s'" % (args["target"],args['host_id']))
         if status is True:
             if len(result) == 0:
-                insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
-                if insert_status is not True:
-                    logger.error("Add target error: %s" % insert_result)
-                    db.close_mysql()
-                    return {"status": False, "message": insert_result}, 500
-            elif result[0]['host_id'] != host_id:
+                logger.info('tag1')
                 insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
                 if insert_status is not True:
                     logger.error("Add target error: %s" % insert_result)
