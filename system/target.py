@@ -307,11 +307,11 @@ class ConfigGenerate(Resource):
         salt_api.shell_remote_execution(minion_id, command_path)
         # 因为传输中名称需要中文，故使用中间文件
         command_list = []
-        command_list.append('cd /tmp/' + project_gitlab_name + ' \n')
-        command_list.append('git pull \n')
-        command_list.append('cp ' + source + ' ' + source_tmp)
-        command_list.append(command)
-        command_list.append('rm -f '+source_tmp)
+        command_list.append('cd /tmp/' + project_gitlab_name + ' \n ')
+        command_list.append('git pull \n ')
+        command_list.append('cp ' + source + ' ' + source_tmp + ' \n ')
+        command_list.append(command + ' \n ')
+        command_list.append('rm -f ' + source_tmp + ' \n ')
         command_final = ''.join(command_list)
         logger.info('command:' + command_final)
         salt_api.shell_remote_execution(master_id, command_final)
