@@ -319,13 +319,11 @@ class ConfigGenerate(Resource):
         command_list.append('rm -f ' + source_tmp + ' \n ')
         command_final = ''.join(command_list)
         logger.info('command:' + command_final)
-        result = salt_api.shell_remote_execution(master_id, command_final)
-
-        for k, v in result.items():
-            logger.info("item:"+str(k)+'  '+str(v))
-            # if not v:
-            #     return {"status": False, "message": '配置发送失败:'+}, 200
-        return {"status": True, "message": '配置发送成功'}, 200
+        result = salt_api.shell_remote_execution([master_id], command_final)
+        if str(result).__contains__('True'):
+            return {"status": True, "message": '配置发送成功'}, 200
+        else:
+            return {"status": False, "message": '配置发送失败:' + str(result)}, 500
 
 
 def get_host_project(host):
