@@ -164,16 +164,16 @@ class UploadTarget(Resource):
                     insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                     if insert_status is not True:
                         logger.error("error:" + insert_result)
-                        return {"status": False, "message": insert_result}, 500
+                        return {"status": False, "message": str(insert_result)}, 200
                 else:
                     exist_ip_list.append(target_dic['IP'])
             if len(exist_ip_list)==0:
                 return {"status": True, "message": ""}, 200
             else:
-                return {"status": False, "message": "表格中有已经存在的IP："+str(exist_ip_list)+'其余IP已经添加完成'}, 500
+                return {"status": False, "message": "表格中有已经存在的IP："+str(exist_ip_list)+'其余IP已经添加完成'}, 200
         except Exception as e:
             logger.info('error:' + str(e))
-            return {"status": False, "message": str(e)}, 500
+            return {"status": False, "message": str(e)}, 200
         finally:
             logger.info("close db")
             db.close_mysql()
