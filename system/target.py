@@ -50,21 +50,15 @@ class Target(Resource):
 
     @access_required(role_dict["product"])
     def delete(self, target_id):
-        user = g.user_info["username"]
         db = DB()
         status, result = db.delete_by_id("target", target_id)
         db.close_mysql()
+        logger.info('delete:'+str(result))
         if status is not True:
             logger.error("Delete product error: %s" % result)
             return {"status": False, "message": result}, 500
         if result is 0:
             return {"status": False, "message": "%s does not exist" % target_id}, 404
-        audit_log(user, target_id, target_id, "product", "delete")
-        info = update_user_privilege("product", target_id)
-        if info["status"] is False:
-            return {"status": False, "message": info["message"]}, 500
-        # 更新Rsync配置
-        rsync_config()
         return {"status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
@@ -356,7 +350,7 @@ class PingList(Resource):
         thread_pool.shutdown(wait=True)
         for future in futures:
             result = future.result()
-            if str(result[minion_id]).__contains__("Timeout"):
+            if str(result['status']).__contains__("Timeout"):
                 targets_not.append(result["target"])
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
 
@@ -364,7 +358,8 @@ class PingList(Resource):
 def pingTarget(target, minion_id, salt_api):
     command = 'snmpwalk -v 2c -t 0.05 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
     logger.info(command)
-    result = {'target': target, 'status': salt_api.shell_remote_execution([minion_id], command)}
+    exec_result = salt_api.shell_remote_execution([minion_id], command)
+    result = {'target': target, 'status': exec_result}
     return result
 
 
