@@ -350,6 +350,7 @@ class PingList(Resource):
         thread_pool.shutdown(wait=True)
         for future in futures:
             result = future.result()
+            logger.info(str(result['status']))
             if str(result['status']).__contains__("Timeout"):
                 targets_not.append(result["target"])
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
