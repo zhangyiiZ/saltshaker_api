@@ -37,7 +37,6 @@ class Groups(Resource):
 
     @access_required(role_dict["product"])
     def delete(self, groups_id):
-        user = g.user_info["username"]
         db = DB()
         # 首先获得所需项目
         status, result = db.select_by_id("groups", groups_id)
@@ -52,10 +51,6 @@ class Groups(Resource):
             return {"status": False, "message": result}, 500
         if result is 0:
             return {"status": False, "message": "%s does not exist" % groups_id}, 404
-        audit_log(user, groups_id, "", "groups", "delete")
-        info = update_user_privilege("groups", groups_id)
-        if info["status"] is False:
-            return {"status": False, "message": info["message"]}, 500
         # 完成数据的统一，将project中的组类别删除
         project_list = group['projects']
         group_name = group['name']

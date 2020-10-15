@@ -63,22 +63,22 @@ class Target(Resource):
 
     @access_required(role_dict["product"])
     def put(self, target_id):
-        user = g.user_info["username"]
         args = parser.parse_args()
         logger.info(args['host_id'])
         args["id"] = target_id
         logger.info('id:' + target_id)
+        del args['path'], args['key_word'], args['file_name'], args['target_id']
         target = args
         db = DB()
         status, message = judge_target_IP_exist(args['IP'], args['host_id'])
         if status is not True:
             return {"status": False, "message": message}, 500
+        target_for_db = target.pop()
         status, result = db.update_by_id("target", json.dumps(target, ensure_ascii=False), target_id)
         db.close_mysql()
         if status is not True:
             logger.error("Modify target: %s" % result)
             return {"status": False, "message": result}, 500
-        audit_log(user, args["id"], target_id, "target", "edit")
         return {"status": True, "message": result}, 200
 
 
@@ -101,6 +101,7 @@ class TargetList(Resource):
     def post(self):
         args = parser.parse_args()
         args["id"] = uuid_prefix("t")
+        del args['path'], args['key_word'], args['file_name'], args['target_id']
         target = args
         db = DB()
         status, message = judge_target_IP_exist(args['IP'], args['host_id'])
@@ -237,7 +238,7 @@ class ConfigGenerate(Resource):
                 model = str(target['model'])
                 if model.__contains__(key_word):
                     target_str = target.pop('target')
-                    del target['host_id']
+                    del target['host_id'], target['id']
                     resdic = {"targets": [target_str], "labels": target}
                     strresult += " " + str(resdic) + ',\n'
             strresult = strresult[:-1] + '\n]'
@@ -384,7 +385,7 @@ class SinglePing(Resource):
         sysDescr = salt_api.shell_remote_execution([minion_id], command)
 
         response_data = {}
-        if str(sysDescr[minion_id]).__contains__("Timeout")|str(sysDescr[minion_id]).__contains__("Unknown"):
+        if str(sysDescr[minion_id]).__contains__("Timeout") | str(sysDescr[minion_id]).__contains__("Unknown"):
             response_data['status'] = '设备网络不通'
         else:
             response_data['status'] = "设备正常"
