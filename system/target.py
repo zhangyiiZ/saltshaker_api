@@ -70,9 +70,12 @@ class Target(Resource):
         del args['path'], args['key_word'], args['file_name'], args['target_id']
         target = args
         db = DB()
-        status, message = judge_target_IP_exist(args['IP'], args['host_id'])
-        if status is not True:
-            return {"status": False, "message": message}, 500
+        status, result = db.select_by_id('target', target_id)
+        origion_IP = result['IP']
+        if origion_IP != args['IP']:
+            status, message = judge_target_IP_exist(args['IP'], args['host_id'])
+            if status is not True:
+                return {"status": False, "message": message}, 500
         status, result = db.update_by_id("target", json.dumps(target, ensure_ascii=False), target_id)
         db.close_mysql()
         if status is not True:
