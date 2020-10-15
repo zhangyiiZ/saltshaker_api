@@ -73,7 +73,6 @@ class Target(Resource):
         status, message = judge_target_IP_exist(args['IP'], args['host_id'])
         if status is not True:
             return {"status": False, "message": message}, 500
-        target_for_db = target.pop()
         status, result = db.update_by_id("target", json.dumps(target, ensure_ascii=False), target_id)
         db.close_mysql()
         if status is not True:
