@@ -53,7 +53,7 @@ class Target(Resource):
         db = DB()
         status, result = db.delete_by_id("target", target_id)
         db.close_mysql()
-        logger.info('delete:'+str(result))
+        logger.info('delete:' + str(result))
         if status is not True:
             logger.error("Delete product error: %s" % result)
             return {"status": False, "message": result}, 500
@@ -103,7 +103,7 @@ class TargetList(Resource):
         args["id"] = uuid_prefix("t")
         target = args
         db = DB()
-        status, message = judge_target_IP_exist(args['IP'],args['host_id'])
+        status, message = judge_target_IP_exist(args['IP'], args['host_id'])
         if status is True:
             insert_status, insert_result = db.insert("target", json.dumps(target, ensure_ascii=False))
             if insert_status is not True:
@@ -127,6 +127,7 @@ def judge_target_IP_exist(IP, host_id):
             return True, ''
         else:
             return False, 'IP already exists'
+
 
 # 上传文件
 class UploadTarget(Resource):
@@ -153,7 +154,7 @@ class UploadTarget(Resource):
                 target_dic['host_id'] = host_id
                 target_dic['id'] = uuid_prefix('t')
                 logger.info(str(target_dic))
-                status, message = judge_target_IP_exist(target_dic['IP'],host_id)
+                status, message = judge_target_IP_exist(target_dic['IP'], host_id)
                 if status:
                     insert_status, insert_result = db.insert("target", json.dumps(target_dic, ensure_ascii=False))
                     if insert_status is not True:
@@ -161,10 +162,10 @@ class UploadTarget(Resource):
                         return {"status": False, "message": str(insert_result)}, 200
                 else:
                     exist_ip_list.append(target_dic['IP'])
-            if len(exist_ip_list)==0:
+            if len(exist_ip_list) == 0:
                 return {"status": True, "message": ""}, 200
             else:
-                return {"status": False, "message": "表格中有已经存在的IP："+str(exist_ip_list)+',其余IP已经添加完成'}, 200
+                return {"status": False, "message": "表格中有已经存在的IP：" + str(exist_ip_list) + ',其余IP已经添加完成'}, 200
         except Exception as e:
             logger.info('error:' + str(e))
             return {"status": False, "message": str(e)}, 200
@@ -351,7 +352,7 @@ class PingList(Resource):
         for future in futures:
             result = future.result()
             logger.info(str(result['status']))
-            if str(result['status']).__contains__("Timeout"):
+            if str(result['status']).__contains__("Timeout") | str(result['status']).__contains__("Unknown"):
                 targets_not.append(result["target"])
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
 
