@@ -90,15 +90,19 @@ class ProjectsList(Resource):
         # product_id = request.args.get("product_id")
         db = DB()
         status, projects_with_groupid = db.select("projects", '')
-        projects_with_group_name = []
-        for project in projects_with_groupid:
-            group_name_list = []
-            for group_id in list(project['group']):
-                status, group = db.select_by_id('groups', group_id)
-                group_name = group['name']
-                group_name_list.append(group_name)
-            project['group'] = group_name_list
-            projects_with_group_name.append(project)
+        try:
+            projects_with_group_name = []
+            for project in projects_with_groupid:
+                group_name_list = []
+                for group_id in list(project['group']):
+                    status, group = db.select_by_id('groups', group_id)
+                    group_name = group['name']
+                    group_name_list.append(group_name)
+                project['group'] = group_name_list
+                projects_with_group_name.append(project)
+        except Exception as e:
+            logger.info('Exception:'+str(e))
+            return {"status": False, "message": str(e)}, 500
         db.close_mysql()
         if status is True:
             return {"data": projects_with_group_name, "status": True, "message": ""}, 200
