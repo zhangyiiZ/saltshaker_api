@@ -26,13 +26,13 @@ class Projects(Resource):
         db = DB()
         status, result = db.select_by_id("projects", project_id)
         try:
-            projects_with_group_name = list(transfer_projectGroupID_to_projectGroupNAME(result))[0]
+            project_with_group_name = list(transfer_projectGroupID_to_projectGroupNAME(result))[0]
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
         db.close_mysql()
         if status is True:
             if result:
-                return {"data": projects_with_group_name, "status": True, "message": ""}, 200
+                return {"data": project_with_group_name, "status": True, "message": ""}, 200
             else:
                 return {"status": False, "message": "%s does not exist" % project_id}, 404
         else:
