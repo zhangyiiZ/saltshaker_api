@@ -52,14 +52,13 @@ class Groups(Resource):
             return {"status": False, "message": "%s does not exist" % groups_id}, 404
         # 完成数据的统一，将project中的组类别删除
         project_list = group['projects']
-        group_name = group['name']
-        for project in project_list:
-            status, result = db.select("projects", "where data -> '$.name'='%s'" % project)
-            project_origion = dict(result[0])
+        for project_id in project_list:
+            status, result = db.select_by_id('projects', project_id)
+            project_origion = dict(result)
             group_list = list(project_origion['group'])
-            group_list.remove(group_name)
+            group_list.remove(groups_id)
             project_origion['group'] = group_list
-            db.update_by_id("projects", json.dumps(project_origion, ensure_ascii=False), project_origion['id'])
+            db.update_by_id("projects", json.dumps(project_origion, ensure_ascii=False), project_id)
         db.close_mysql()
         return {"status": True, "message": ""}, 200
 
@@ -169,7 +168,7 @@ def get_group_project(group_list, project_list, db):
             for group_project in project["group"]:
                 if group["name"] == group_project:
                     group['projects'] = []
-                    group["projects"].append(project["name"])
+                    group["projects"].append(project["id"])
         db.update_by_id("groups", json.dumps(group, ensure_ascii=False), group['id'])
     return group_list
 
