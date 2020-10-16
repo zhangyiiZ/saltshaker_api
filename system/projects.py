@@ -145,11 +145,14 @@ def update_group_for_create_project(project_name, groups_id_list):
 
 def transfer_args_to_project(args):
     db = DB()
+    logger.info('args:'+str(args))
     group_name_list = list(args['groups'])
     group_id_list = []
     for group_name in group_name_list:
         status, result = db.select("groups", "where data -> '$.name'='%s'" % group_name)
+        logger.info(str(result[0]['id']))
         group_id_list.append(str(result[0]['id']))
+    logger.info('group_id_list:'+str(group_id_list))
     args['groups'] = group_id_list
     db.close_mysql()
     return args
