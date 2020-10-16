@@ -36,7 +36,6 @@ class Projects(Resource):
 
     @access_required(role_dict["product"])
     def delete(self, project_id):
-        user = g.user_info["username"]
         db = DB()
         status, result = db.delete_by_id("projects", project_id)
         db.close_mysql()
@@ -88,21 +87,36 @@ class Projects(Resource):
 class ProjectsList(Resource):
     @access_required(role_dict["product"])
     def get(self):
-        #product_id = request.args.get("product_id")
+        # product_id = request.args.get("product_id")
         db = DB()
-        status, result = db.select("projects", '')
+        status, projects_with_groupid = db.select("projects", '')
+        projects_with_group_name = []
+        for project in projects_with_groupid:
+            group_name_list = []
+            for group_id in list(project['group']):
+                status, group = db.select_by_id('groups', group_id)
+                group_name = group['name']
+                group_name_list.append(group_name)
+            project['group'] = group_name_list
+            projects_with_group_name.append(project)
         db.close_mysql()
         if status is True:
-            return {"data": result, "status": True, "message": ""}, 200
+            return {"data": projects_with_group_name, "status": True, "message": ""}, 200
         else:
-            return {"status": False, "message": result}, 500
+            return {"status": False, "message": projects_with_group_name}, 500
 
     @access_required(role_dict["product"])
     def post(self):
         args = parser.parse_args()
         args["id"] = uuid_prefix("project")
-        projects = args
         db = DB()
+        group_name_list = list(args['group'])
+        group_id_list = []
+        for group_name in group_name_list:
+            status, result = db.select("groups", "where data -> '$.name'='%s'" % group_name)
+            group_id_list.append(str(result[0]['id']))
+        args['group'] = group_id_list
+        projects = args
         status, result = db.select_by_id("product", args["product_id"])
         if status is True:
             if not result:
@@ -127,6 +141,3 @@ class ProjectsList(Resource):
             db.close_mysql()
             logger.error("Select projects name error: %s" % result)
             return {"status": False, "message": result}, 500
-
-
-

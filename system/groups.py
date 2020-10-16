@@ -7,7 +7,6 @@ from common.db import DB
 from common.utility import uuid_prefix
 from common.sso import access_required
 import json
-from system.user import update_user_privilege
 from common.const import role_dict
 
 logger = loggers()
