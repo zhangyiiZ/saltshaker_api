@@ -131,7 +131,7 @@ class ProjectsList(Resource):
 def update_group_for_create_project(project_name, groups_id_list):
     db = DB()
     logger.info('UPDATEGROUP')
-    logger.info('project_name:'+project_name+'groups_id_list:'+groups_id_list)
+    logger.info('project_name:'+project_name+'groups_id_list:'+str(groups_id_list))
     for group_id in groups_id_list:
         status, group = db.select_by_id('groups', group_id)
         project_name_list = list(group['projects'])
