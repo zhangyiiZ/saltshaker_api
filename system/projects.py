@@ -153,7 +153,10 @@ def transfer_args_to_project(args):
 
 def transfer_projectGroupID_to_projectGroupNAME(projects_with_groupid):
     db = DB()
+    if not isinstance(projects_with_groupid, list):
+        projects_with_groupid = [projects_with_groupid]
     projects_with_group_name = []
+    logger.info('projects_with_groupid:'+str(projects_with_groupid))
     for project in projects_with_groupid:
         logger.info('project:' + str(project))
         group_name_list = []
