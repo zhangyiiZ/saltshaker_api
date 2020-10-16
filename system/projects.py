@@ -25,10 +25,14 @@ class Projects(Resource):
     def get(self, project_id):
         db = DB()
         status, result = db.select_by_id("projects", project_id)
+        try:
+            projects_with_group_name = transfer_projectGroupID_to_projectGroupNAME(result)
+        except Exception as e:
+            return {"status": False, "message": str(e)}, 500
         db.close_mysql()
         if status is True:
             if result:
-                return {"data": result, "status": True, "message": ""}, 200
+                return {"data": projects_with_group_name, "status": True, "message": ""}, 200
             else:
                 return {"status": False, "message": "%s does not exist" % project_id}, 404
         else:
@@ -89,17 +93,7 @@ class ProjectsList(Resource):
         db = DB()
         status, projects_with_groupid = db.select("projects", '')
         try:
-            projects_with_group_name = []
-            for project in projects_with_groupid:
-                logger.info('project:' + str(project))
-                group_name_list = []
-                for group_id in list(project['groups']):
-                    status, group = db.select_by_id('groups', group_id)
-                    logger.info('group:' + str(group))
-                    group_name = group['name']
-                    group_name_list.append(group_name)
-                project['groups'] = group_name_list
-                projects_with_group_name.append(project)
+            projects_with_group_name = transfer_projectGroupID_to_projectGroupNAME(projects_with_groupid)
         except Exception as e:
             logger.info('Exception:' + str(e))
             return {"status": False, "message": str(e)}, 500
@@ -156,6 +150,21 @@ def transfer_args_to_project(args):
     args['groups'] = group_id_list
     db.close_mysql()
     return args
+
+def transfer_projectGroupID_to_projectGroupNAME(projects_with_groupid):
+    db = DB()
+    projects_with_group_name = []
+    for project in projects_with_groupid:
+        logger.info('project:' + str(project))
+        group_name_list = []
+        for group_id in list(project['groups']):
+            status, group = db.select_by_id('groups', group_id)
+            logger.info('group:' + str(group))
+            group_name = group['name']
+            group_name_list.append(group_name)
+        project['groups'] = group_name_list
+        projects_with_group_name.append(project)
+    return projects_with_group_name
 
 
 def update_group_for_update_project(project_id, new_group_list, project_new_name):
