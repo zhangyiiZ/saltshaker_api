@@ -113,17 +113,6 @@ class GroupsList(Resource):
         else:
             db.close_mysql()
             return {"status": False, "message": result}, 500
-
-        status, result = db.select("projects", "where data -> '$.product_id'='%s'" % product_id)
-        if status is True:
-            project_list = result
-        else:
-            db.close_mysql()
-            return {"status": False, "message": result}, 500
-        try:
-            group_list = get_group_project(group_list, project_list, db)
-        except Exception as e:
-            logger.info("exception:" + str(e))
         db.close_mysql()
         return {"data": group_list, "status": True, "message": ""}, 200
 
@@ -162,15 +151,15 @@ class GroupsList(Resource):
             return {"status": False, "message": result}, 500
 
 
-def get_group_project(group_list, project_list, db):
-    for group in group_list:
-        for project in project_list:
-            for group_project in project["group"]:
-                if group["name"] == group_project:
-                    group['projects'] = []
-                    group["projects"].append(project["id"])
-        db.update_by_id("groups", json.dumps(group, ensure_ascii=False), group['id'])
-    return group_list
+# def get_group_project(group_list, project_list, db):
+#     for group in group_list:
+#         for project in project_list:
+#             for group_project in project["group"]:
+#                 if group["name"] == group_project:
+#                     group['projects'] = []
+#                     group["projects"].append(project["id"])
+#         db.update_by_id("groups", json.dumps(group, ensure_ascii=False), group['id'])
+#     return group_list
 
 
 def group_to_user(gid, uid):
