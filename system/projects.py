@@ -26,7 +26,7 @@ class Projects(Resource):
         db = DB()
         status, result = db.select_by_id("projects", project_id)
         try:
-            projects_with_group_name = transfer_projectGroupID_to_projectGroupNAME(result)
+            projects_with_group_name = list(transfer_projectGroupID_to_projectGroupNAME(result))[0]
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
         db.close_mysql()
