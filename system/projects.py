@@ -93,9 +93,11 @@ class ProjectsList(Resource):
         try:
             projects_with_group_name = []
             for project in projects_with_groupid:
+                logger.info('project:'+str(project))
                 group_name_list = []
                 for group_id in list(project['group']):
                     status, group = db.select_by_id('groups', group_id)
+                    logger.info('group:'+str(group))
                     group_name = group['name']
                     group_name_list.append(group_name)
                 project['group'] = group_name_list
