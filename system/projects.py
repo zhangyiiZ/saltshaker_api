@@ -130,10 +130,14 @@ class ProjectsList(Resource):
 
 def update_group_for_create_project(project_name, groups_id_list):
     db = DB()
+    logger.info('UPDATEGROUP')
+    logger.info('project_name:'+project_name+'groups_id_list:'+groups_id_list)
     for group_id in groups_id_list:
         status, group = db.select_by_id('groups', group_id)
         project_name_list = list(group['projects'])
         project_name_list.append(project_name)
+        group['projects'] = project_name_list
+        status, result = db.update_by_id('groups',json.dumps(group, ensure_ascii=False),group_id)
     db.close_mysql()
 
 
@@ -172,7 +176,7 @@ def transfer_projectGroupID_to_projectGroupNAME(projects_with_groupid):
 
 def update_group_for_update_project(project_id, new_group_list, project_new_name):
     db = DB()
-    status, project = dict(db.select_by_id('projects', project_id))
+    status, project = db.select_by_id('projects', project_id)
     project_origion_name = project['name']
     origion_group_list = project['groups']
     common_group_list = [x for x in origion_group_list if x in new_group_list]
