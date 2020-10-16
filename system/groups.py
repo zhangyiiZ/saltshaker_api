@@ -79,6 +79,8 @@ class Groups(Resource):
             return {"status": False, "message": result}, 500
         # 判断是否存在
         select_status, select_result = db.select_by_id("groups", groups_id)
+        projects = select_result['projects']
+        groups['projects'] = projects
         if select_status is not True:
             db.close_mysql()
             logger.error("Modify groups error: %s" % select_result)
