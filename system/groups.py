@@ -51,6 +51,14 @@ class Groups(Resource):
         if result is 0:
             return {"status": False, "message": "%s does not exist" % groups_id}, 404
         # 完成数据的统一，将project中的组类别删除
+        project_list = group['projects']
+        for project_name in project_list:
+            status, result = db.select('projects', "where data -> '$.name'='%s'" % project_name)
+            project_origion = dict(result[0])
+            group_list = list(project_origion['groups'])
+            group_list.remove(groups_id)
+            project_origion['groups'] = group_list
+            db.update_by_id("projects", json.dumps(project_origion, ensure_ascii=False), result[0]['id'])
         db.close_mysql()
         return {"status": True, "message": ""}, 200
 
