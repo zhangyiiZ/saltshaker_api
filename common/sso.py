@@ -20,7 +20,6 @@ secret_key = config.get("Token", "SECRET_KEY")
 expires_in = int(config.get("Token", "EXPIRES_IN"))
 cookie_key = config.get("Token", "COOKIE_KEY")
 
-
 serializer = Serializer(secret_key, expires_in=expires_in)
 
 
@@ -99,7 +98,9 @@ def access_required(tag):
                     return func(*args, **kwargs)
             else:
                 return {"status": False, "message": "Unauthorized access"}, 401
+
         return verify_token
+
     return login_required
 
 
@@ -160,24 +161,15 @@ def menu_list(username):
                                 ]
                         break
                     elif result["tag"] == role_dict["product"]:
-                        menu = [1, 10, 11, 12,
-                                2, 20, 21, 22,
+                        menu = [2, 20, 22,
                                 3, 30,
                                 4, 40,
                                 5, 50,
-                                6, 60, 61, 62, 63,
-                                7, 70,
-                                8, 80,
-                                100, 103
+                                6, 60, 61, 62, 63
                                 ]
                         break
                     else:
-                        menu = [1, 10, 11, 12,
-                                2, 20, 22,
-                                3, 30,
-                                5, 50,
-                                6, 60, 61, 62, 63
-                                ]
+                        menu = []
         except Exception as e:
             logger.error("Menu list error: %s" % e)
     db.close_mysql()
