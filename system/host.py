@@ -248,12 +248,18 @@ class HostListForTarget(Resource):
         project_id = args['project_id']
         db = DB()
         status, project = db.select_by_id('projects', project_id)
-        host_set = set()
+        minion_set = set()
+        host_list = []
         try:
             group_list = project['groups']
             for group_id in group_list:
                 status, group = db.select_by_id('groups', group_id)
-                host_set.update(list(group['minion']))
-            return {"data": list(host_set), "status": True, "message": ""}, 200
+                minion_set.update(list(group['minion']))
+            for minion in minion_set:
+                status, host = db.select('host',"where data -> '$.minion_id'='%s'" % minion)
+                host_list.append(host[0])
+                db.close_mysql()
+            return {"data": host_list, "status": True, "message": ""}, 200
         except Exception as e:
+            db.close_mysql()
             return {"status": False, "message": str(e)}, 500
