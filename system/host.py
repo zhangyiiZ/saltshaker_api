@@ -255,9 +255,11 @@ class HostListForTarget(Resource):
             for group_id in group_list:
                 status, group = db.select_by_id('groups', group_id)
                 minion_set.update(list(group['minion']))
-            for minion in minion_set:
-                status, host = db.select('host',"where data -> '$.minion_id'='%s'" % minion)
-                host_list.append(host[0])
+            for i in range(100):
+                for minion in minion_set:
+                    status, host = db.select('host', "where data -> '$.minion_id'='%s'" % minion)
+                    host_list.append(host[0])
+
             db.close_mysql()
             return {"data": host_list, "status": True, "message": ""}, 200
         except Exception as e:
