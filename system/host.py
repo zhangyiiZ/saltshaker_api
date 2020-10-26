@@ -75,7 +75,7 @@ class Host(Resource):
         if select_result:
             try:
                 host = select_result
-                if args['tag'] !=[]:
+                if args['tag'] != []:
                     host["tag"] = args["tag"]
                 if args['rename'] != '':
                     host["rename"] = args["rename"]
@@ -237,41 +237,21 @@ class Hosts(object):
                 logger.error("Select %s host does not exist" % minion_id)
         db.close_mysql()
 
+
 class HostListForTarget(Resource):
     @access_required(role_dict["common_user"])
-    def get(self):
-        logger.info("HostListForTarget")
-        db = DB()
-        status, result = db.select("host", "")
-        if status is True:
-            host_list = result
-        else:
-            db.close_mysql()
-            return {"status": False, "message": result}, 500
-        db.close_mysql()
-        return {"data": host_list, "status": True, "message": ""}, 200
-
-    @access_required(role_dict["common_user"])
     def post(self):
-        args = parser.parse_args()
-        args["id"] = uuid_prefix("h")
-        user = g.user_info["username"]
-        host = args
+        logger.info("HostListForTarget")
+        project_id = request.args.get("project_id")
         db = DB()
-        status, result = db.select("host", "where data -> '$.minion_id'='%s'" % args["minion_id"])
-        if status is True:
-            if len(result) == 0:
-                insert_status, insert_result = db.insert("host", json.dumps(host, ensure_ascii=False))
-                db.close_mysql()
-                if insert_status is not True:
-                    logger.error("Add host error: %s" % insert_result)
-                    return {"status": False, "message": insert_result}, 500
-                audit_log(user, args["id"], args["product_id"], "host", "add")
-                return {"status": True, "message": ""}, 201
-            else:
-                db.close_mysql()
-                return {"status": False, "message": "The host name already exists"}, 200
-        else:
-            db.close_mysql()
-            logger.error("Select host name error: %s" % result)
-            return {"status": False, "message": result}, 500
+        status, project = db.select_by_id('projects', project_id)
+        host_list = []
+        try:
+            group_list = project['groups']
+            for group_id in group_list:
+                status, group = db.select_by_id('groups', group_id)
+                host_list.append(group['minion'])
+            return {"data": host_list, "status": True, "message": ""}, 200
+        except Exception as e:
+            return {"status": False, "message": str(e)}, 500
+
