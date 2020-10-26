@@ -240,9 +240,8 @@ class Hosts(object):
 
 class HostListForTarget(Resource):
     @access_required(role_dict["common_user"])
-    def get(self):
+    def get(self, project_id):
         logger.info("HostListForTarget")
-        project_id = request.args.get("project_id")
         db = DB()
         status, project = db.select_by_id('projects', project_id)
         host_list = []
@@ -254,4 +253,3 @@ class HostListForTarget(Resource):
             return {"data": host_list, "status": True, "message": ""}, 200
         except Exception as e:
             return {"status": False, "message": str(e)}, 500
-
