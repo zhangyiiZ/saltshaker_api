@@ -16,7 +16,9 @@ parser = reqparse.RequestParser()
 parser.add_argument("product_id", type=str, required=True, trim=True)
 parser.add_argument("minion_id", type=str, required=True, trim=True)
 parser.add_argument("rename", type=str, default='', trim=True)
+parser.add_argument("project_id", type=str, default='', trim=True)
 parser.add_argument("tag", type=dict, default=[], action="append")
+
 
 
 class Host(Resource):
@@ -242,9 +244,8 @@ class HostListForTarget(Resource):
     @access_required(role_dict["common_user"])
     def post(self):
         logger.info("HostListForTarget")
-        parser = reqparse.RequestParser()
-        parser.add_argument("project_id", type=str, required=True, trim=True)
-        project_id = request.args.get("project_id")
+        args = parser.parse_args()
+        project_id = args['project_id']
         db = DB()
         status, project = db.select_by_id('projects', project_id)
         host_list = []
