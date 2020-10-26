@@ -72,7 +72,7 @@ api.add_resource(Groups, "/saltshaker/api/v1.0/groups/<string:groups_id>")
 # host
 api.add_resource(HostList, "/saltshaker/api/v1.0/host")
 api.add_resource(Host, "/saltshaker/api/v1.0/host/<string:host_id>")
-api.add_resource(HostListForTarget, "/saltshaker/api/v1.0/host/target")
+api.add_resource(HostListForTarget, "/saltshaker/api/v1.0/host/target/<string:project_id>")
 
 # minions
 api.add_resource(MinionsStatus, "/saltshaker/api/v1.0/minions/status")

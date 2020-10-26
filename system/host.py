@@ -240,7 +240,7 @@ class Hosts(object):
 
 class HostListForTarget(Resource):
     @access_required(role_dict["common_user"])
-    def post(self):
+    def get(self):
         logger.info("HostListForTarget")
         project_id = request.args.get("project_id")
         db = DB()
