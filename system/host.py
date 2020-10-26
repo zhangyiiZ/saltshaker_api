@@ -258,7 +258,7 @@ class HostListForTarget(Resource):
             for minion in minion_set:
                 status, host = db.select('host',"where data -> '$.minion_id'='%s'" % minion)
                 host_list.append(host[0])
-                db.close_mysql()
+            db.close_mysql()
             return {"data": host_list, "status": True, "message": ""}, 200
         except Exception as e:
             db.close_mysql()
