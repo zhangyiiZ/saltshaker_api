@@ -50,6 +50,7 @@ class Projects(Resource):
             return {"status": False, "message": result}, 500
         if result is 0:
             return {"status": False, "message": "%s does not exist" % project_id}, 404
+        update_group_for_update_project(project_id, [], '')
         return {"status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
@@ -149,36 +150,6 @@ def update_group_for_create_project(project_name, groups_id_list):
     db.close_mysql()
 
 
-def transfer_args_to_project(args):
-    db = DB()
-    group_name_list = list(args['groups'])
-    group_id_list = []
-    for group_name in group_name_list:
-        status, result = db.select("groups", "where data -> '$.name'='%s'" % group_name)
-        logger.info(str(result[0]['id']))
-        group_id_list.append(str(result[0]['id']))
-    args['groups'] = group_id_list
-    db.close_mysql()
-    return args
-
-
-def transfer_projectGroupID_to_projectGroupNAME(projects_with_groupid):
-    db = DB()
-    if not isinstance(projects_with_groupid, list):
-        projects_with_groupid = [projects_with_groupid]
-    projects_with_group_name = []
-    for project in projects_with_groupid:
-        group_name_list = []
-        for group_id in list(project['groups']):
-            status, group = db.select_by_id('groups', group_id)
-            logger.info('group:' + str(group))
-            group_name = group['name']
-            group_name_list.append(group_name)
-        project['groups'] = group_name_list
-        projects_with_group_name.append(project)
-    return projects_with_group_name
-
-
 def update_group_for_update_project(project_id, new_group_list, project_new_name):
     db = DB()
     status, project = db.select_by_id('projects', project_id)
@@ -226,6 +197,36 @@ def update_group_for_update_project(project_id, new_group_list, project_new_name
     return status_final, message
 
 
+def transfer_args_to_project(args):
+    db = DB()
+    group_name_list = list(args['groups'])
+    group_id_list = []
+    for group_name in group_name_list:
+        status, result = db.select("groups", "where data -> '$.name'='%s'" % group_name)
+        logger.info(str(result[0]['id']))
+        group_id_list.append(str(result[0]['id']))
+    args['groups'] = group_id_list
+    db.close_mysql()
+    return args
+
+
+def transfer_projectGroupID_to_projectGroupNAME(projects_with_groupid):
+    db = DB()
+    if not isinstance(projects_with_groupid, list):
+        projects_with_groupid = [projects_with_groupid]
+    projects_with_group_name = []
+    for project in projects_with_groupid:
+        group_name_list = []
+        for group_id in list(project['groups']):
+            status, group = db.select_by_id('groups', group_id)
+            logger.info('group:' + str(group))
+            group_name = group['name']
+            group_name_list.append(group_name)
+        project['groups'] = group_name_list
+        projects_with_group_name.append(project)
+    return projects_with_group_name
+
+
 def create_git_project(product_id, project_name):
     logger.info("create_git_project1")
     db = DB()
@@ -270,5 +271,3 @@ def commit_init_file(project):
     else:
         project.commits.create(data_create)
         return True
-
-
