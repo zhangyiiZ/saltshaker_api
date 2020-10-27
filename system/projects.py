@@ -237,7 +237,7 @@ def create_git_project(product_id, project_name):
             try:
                 gl.projects.create({'name': project_name})
             except Exception as e:
-                raise Exception('该项目名已被占用')
+                raise Exception('该gitlab项目名已被占用')
             projects = gl.projects.list(all=True)
             for pr in projects:
                 if str(pr.__dict__.get('_attrs').get('path_with_namespace')).replace('root/', '') == project_name:
