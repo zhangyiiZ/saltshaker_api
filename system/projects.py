@@ -116,7 +116,10 @@ class ProjectsList(Resource):
                                    % (args["name"], args["product_id"]))
         if status is True:
             if len(result) == 0:
-                create_git_project(args['product_id'], args['gitlab_name'])
+                try:
+                    create_git_project(args['product_id'], args['gitlab_name'])
+                except Exception as e:
+                    return {"status": False, "message": str(e)}, 500
                 insert_status, insert_result = db.insert("projects", json.dumps(project, ensure_ascii=False))
                 update_group_for_create_project(project['name'], project['groups'])
                 db.close_mysql()
@@ -229,8 +232,11 @@ def create_git_project(product_id, project_name):
         if len(result) == 0:
             logger.info('project_name:' + project_name)
             gl = get_gitlab(product_id)
+            logger.info('2')
             gl.create({'name': project_name})
+            logger.info('3')
             projects = gl.projects.list(all=True)
+            logger.info('4')
             for pr in projects:
                 if str(pr.__dict__.get('_attrs').get('path_with_namespace')).replace('root/', '') == project_name:
                     project = gl.projects.get(pr.__dict__.get('_attrs').get('id'))
