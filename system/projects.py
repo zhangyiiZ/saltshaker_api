@@ -116,10 +116,10 @@ class ProjectsList(Resource):
                                    % (args["name"], args["product_id"]))
         if status is True:
             if len(result) == 0:
+                create_git_project(args['product_id'], args['gitlab_name'])
                 insert_status, insert_result = db.insert("projects", json.dumps(project, ensure_ascii=False))
                 update_group_for_create_project(project['name'], project['groups'])
                 db.close_mysql()
-                create_git_project(args['product_id'], args['gitlab_name'])
                 if insert_status is not True:
                     return {"status": False, "message": insert_result}, 500
                 return {"status": True, "message": ""}, 200
