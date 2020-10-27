@@ -67,6 +67,8 @@ class Projects(Resource):
         if not select_result:
             db.close_mysql()
             return {"status": False, "message": "%s does not exist" % project_id}, 404
+        gitlab_name_origion = select_result['gitlab_name']
+        args['gitlab_name'] = gitlab_name_origion
         # 判断名字否已经存在
         status, result = db.select("projects", "where data -> '$.name'='%s' and  data -> '$.product_id'='%s'"
                                    % (args["name"], args["product_id"]))
@@ -232,7 +234,10 @@ def create_git_project(product_id, project_name):
         if len(result) == 0:
             logger.info('project_name:' + project_name)
             gl = get_gitlab(product_id)
-            gl.projects.create({'name': project_name})
+            try:
+                gl.projects.create({'name': project_name})
+            except Exception as e:
+                raise Exception('该项目名已被占用')
             projects = gl.projects.list(all=True)
             for pr in projects:
                 if str(pr.__dict__.get('_attrs').get('path_with_namespace')).replace('root/', '') == project_name:
