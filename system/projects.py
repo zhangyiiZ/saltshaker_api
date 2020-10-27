@@ -7,6 +7,8 @@ from common.db import DB
 from common.utility import uuid_prefix
 from common.sso import access_required
 import json
+
+from fileserver.git_fs import get_gitlab
 from system.user import update_user_privilege
 from common.const import role_dict
 
@@ -117,6 +119,7 @@ class ProjectsList(Resource):
                 insert_status, insert_result = db.insert("projects", json.dumps(project, ensure_ascii=False))
                 update_group_for_create_project(project['name'], project['groups'])
                 db.close_mysql()
+                create_git_project(args['product_id'], args['gitlab_name'])
                 if insert_status is not True:
                     return {"status": False, "message": insert_result}, 500
                 return {"status": True, "message": ""}, 200
@@ -131,36 +134,37 @@ class ProjectsList(Resource):
 def update_group_for_create_project(project_name, groups_id_list):
     db = DB()
     logger.info('UPDATEGROUP')
-    logger.info('project_name:'+project_name+'groups_id_list:'+str(groups_id_list))
+    logger.info('project_name:' + project_name + 'groups_id_list:' + str(groups_id_list))
     for group_id in groups_id_list:
         status, group = db.select_by_id('groups', group_id)
         project_name_list = list(group['projects'])
         project_name_list.append(project_name)
         group['projects'] = project_name_list
-        status, result = db.update_by_id('groups',json.dumps(group, ensure_ascii=False),group_id)
+        status, result = db.update_by_id('groups', json.dumps(group, ensure_ascii=False), group_id)
     db.close_mysql()
 
 
 def transfer_args_to_project(args):
     db = DB()
-    logger.info('args:'+str(args))
+    logger.info('args:' + str(args))
     group_name_list = list(args['groups'])
     group_id_list = []
     for group_name in group_name_list:
         status, result = db.select("groups", "where data -> '$.name'='%s'" % group_name)
         logger.info(str(result[0]['id']))
         group_id_list.append(str(result[0]['id']))
-    logger.info('group_id_list:'+str(group_id_list))
+    logger.info('group_id_list:' + str(group_id_list))
     args['groups'] = group_id_list
     db.close_mysql()
     return args
+
 
 def transfer_projectGroupID_to_projectGroupNAME(projects_with_groupid):
     db = DB()
     if not isinstance(projects_with_groupid, list):
         projects_with_groupid = [projects_with_groupid]
     projects_with_group_name = []
-    logger.info('projects_with_groupid:'+str(projects_with_groupid))
+    logger.info('projects_with_groupid:' + str(projects_with_groupid))
     for project in projects_with_groupid:
         logger.info('project:' + str(project))
         group_name_list = []
@@ -217,5 +221,30 @@ def update_group_for_update_project(project_id, new_group_list, project_new_name
     except Exception as e:
         status_final = False
         message = str(e)
-    logger.info('status_final'+str(status_final))
+    logger.info('status_final' + str(status_final))
     return status_final, message
+
+
+def create_git_project(product_id, project_name):
+    db = DB()
+    status, result = db.select('projects', "where data -> '$.gitlab_name'='%s'" % project_name)
+    if status is True:
+        if len(result) == 0:
+            logger.info('project_name:' + project_name)
+            gl = get_gitlab(product_id)
+            gl.create({'name': project_name})
+            projects = gl.projects.list(all=True)
+            for pr in projects:
+                if str(pr.__dict__.get('_attrs').get('path_with_namespace')).replace('root/', '') == project_name:
+                    project = gl.projects.get(pr.__dict__.get('_attrs').get('id'))
+            return True
+        else:
+            db.close_mysql()
+            return False
+    else:
+        db.close_mysql()
+        raise Exception('mysql select from projects error')
+
+
+def commit_init_file(project):
+    return None
