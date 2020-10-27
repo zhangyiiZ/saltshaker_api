@@ -232,14 +232,12 @@ def create_git_project(product_id, project_name):
         if len(result) == 0:
             logger.info('project_name:' + project_name)
             gl = get_gitlab(product_id)
-            logger.info('2')
             gl.projects.create({'name': project_name})
-            logger.info('3')
             projects = gl.projects.list(all=True)
-            logger.info('4')
             for pr in projects:
                 if str(pr.__dict__.get('_attrs').get('path_with_namespace')).replace('root/', '') == project_name:
                     project = gl.projects.get(pr.__dict__.get('_attrs').get('id'))
+                    commit_init_file(project)
             return True
         else:
             db.close_mysql()
@@ -250,4 +248,22 @@ def create_git_project(product_id, project_name):
 
 
 def commit_init_file(project):
-    return None
+    branch_name = "master"
+    data_create = {
+        'branch': branch_name,
+        'commit_message': 'init',
+        'actions': [
+            {
+                'action': "create",
+                'file_path': '/' + 'README',
+                'content': 'README'
+            }
+        ]
+    }
+    if isinstance(project, dict):
+        return False
+    else:
+        project.commits.create(data_create)
+        return True
+
+

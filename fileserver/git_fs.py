@@ -119,7 +119,6 @@ def get_gitlab(product_id):
                                timeout=120,
                                api_version=None if product.get("api_version") is "" else product.get("api_version")
                                )
-            logger.info('1')
             return gl
         else:
             return {"status": False, "message": "File server is not gitfs"}, ""
