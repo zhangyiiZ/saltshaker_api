@@ -50,7 +50,9 @@ class Projects(Resource):
             return {"status": False, "message": result}, 500
         if result is 0:
             return {"status": False, "message": "%s does not exist" % project_id}, 404
-        update_group_for_update_project(project_id, [], '')
+        status, message = update_group_for_delete_project(project_id)
+        if status is not True:
+            return {"status": False, "message": message}, 500
         return {"status": True, "message": ""}, 200
 
     @access_required(role_dict["product"])
@@ -194,6 +196,24 @@ def update_group_for_update_project(project_id, new_group_list, project_new_name
         status_final = False
         message = str(e)
     logger.info('status_final' + str(status_final))
+    return status_final, message
+
+def update_group_for_delete_project(project_id):
+    db = DB()
+    status, project = db.select_by_id('projects', project_id)
+    group_id_list = project['groups']
+    project_origion_name = project['name']
+    status_final = True
+    message = ''
+    for group_id in group_id_list:
+        status, group = db.select_by_id('groups', group_id)
+        project_list = list(group['projects'])
+        project_list.remove(project_origion_name)
+        group['projects'] = project_list
+        status, result = db.update_by_id('groups', json.dumps(group, ensure_ascii=False), group_id)
+        if status is not True:
+            status_final = False
+            message = 'update error'
     return status_final, message
 
 
