@@ -50,7 +50,11 @@ class Projects(Resource):
             return {"status": False, "message": result}, 500
         if result is 0:
             return {"status": False, "message": "%s does not exist" % project_id}, 404
-        status, message = update_group_for_delete_project(project_id)
+        try:
+            status, message = update_group_for_delete_project(project_id)
+        except Exception as e:
+            logger.info('Exception:'+str(e))
+
         if status is not True:
             return {"status": False, "message": message}, 500
         return {"status": True, "message": ""}, 200
