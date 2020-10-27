@@ -233,7 +233,7 @@ def create_git_project(product_id, project_name):
             logger.info('project_name:' + project_name)
             gl = get_gitlab(product_id)
             logger.info('2')
-            gl.create({'name': project_name})
+            gl.projects.create({'name': project_name})
             logger.info('3')
             projects = gl.projects.list(all=True)
             logger.info('4')
