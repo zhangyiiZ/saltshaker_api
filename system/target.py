@@ -376,6 +376,7 @@ class SinglePing(Resource):
         logger.info("SinglePing")
         args = parser.parse_args()
         target_id = args['target_id']
+        cipher = args['cipher']
         # 获得所需参数minion_id、product_id、target_ip
         db = DB()
         state, result = db.select_by_id('target', target_id)
@@ -385,7 +386,7 @@ class SinglePing(Resource):
         minion_id = result['minion_id']
         product_id = result['product_id']
         salt_api = salt_api_for_product(product_id)
-        command = 'snmpwalk -v 2c -c \'yundiao*&COC2016\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
+        command = 'snmpwalk -v 2c -t 0.5 -c \'' + cipher + '\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
         sysDescr = salt_api.shell_remote_execution([minion_id], command)
 
         response_data = {}
