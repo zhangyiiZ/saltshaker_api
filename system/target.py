@@ -32,6 +32,7 @@ parser.add_argument("pool", type=str, default='', trim=True)
 parser.add_argument("path", type=str, default='', trim=True)
 parser.add_argument("key_word", type=str, default='', trim=True)
 parser.add_argument("file_name", type=str, default='', trim=True)
+parser.add_argument("cipher", type=str, default='', trim=True)
 
 
 class Target(Resource):
@@ -67,7 +68,7 @@ class Target(Resource):
         logger.info(args['host_id'])
         args["id"] = target_id
         logger.info('id:' + target_id)
-        del args['path'], args['key_word'], args['file_name'], args['target_id']
+        del args['path'], args['key_word'], args['file_name'], args['target_id'], args['cipher']
         target = args
         db = DB()
         status, result = db.select_by_id('target', target_id)
@@ -103,7 +104,7 @@ class TargetList(Resource):
     def post(self):
         args = parser.parse_args()
         args["id"] = uuid_prefix("t")
-        del args['path'], args['key_word'], args['file_name'], args['target_id']
+        del args['path'], args['key_word'], args['file_name'], args['target_id'], args['cipher']
         target = args
         db = DB()
         status, message = judge_target_IP_exist(args['IP'], args['host_id'])
@@ -339,6 +340,7 @@ class PingList(Resource):
         args = parser.parse_args()
         db = DB()
         host_id = args['host_id']
+        cipher = args['cipher']
         state, result = db.select('host', "where data -> '$.id'='%s'" % host_id)
         minion_id = result[0]['minion_id']
         logger.info('minion_id:' + minion_id)
@@ -349,7 +351,7 @@ class PingList(Resource):
         thread_pool = ThreadPoolExecutor(max_workers=10, thread_name_prefix="target_")
         futures = []
         for target in targets:
-            future = thread_pool.submit(pingTarget, target, minion_id, salt_api)
+            future = thread_pool.submit(pingTarget, target, minion_id, salt_api, cipher)
             futures.append(future)
         thread_pool.shutdown(wait=True)
         for future in futures:
@@ -360,8 +362,8 @@ class PingList(Resource):
         return {"status": True, "message": '配置发送成功', "data": targets_not}, 200
 
 
-def pingTarget(target, minion_id, salt_api):
-    command = 'snmpwalk -v 2c -t 0.05 -c \'yundiao*&COC2016\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
+def pingTarget(target, minion_id, salt_api, cipher):
+    command = 'snmpwalk -v 2c -t 0.5 -c \'' + cipher + '\' ' + target["IP"] + ' 1.3.6.1.2.1.1.1'
     logger.info(command)
     exec_result = salt_api.shell_remote_execution([minion_id], command)
     result = {'target': target, 'status': exec_result}
