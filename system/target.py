@@ -387,6 +387,7 @@ class SinglePing(Resource):
         product_id = result['product_id']
         salt_api = salt_api_for_product(product_id)
         command = 'snmpwalk -v 2c -t 0.5 -c \'' + cipher + '\' ' + target_ip + ' 1.3.6.1.2.1.1.1'
+        logger.info('command:'+command)
         sysDescr = salt_api.shell_remote_execution([minion_id], command)
 
         response_data = {}
