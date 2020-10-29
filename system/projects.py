@@ -148,8 +148,8 @@ def git_clone(product_id, project_name):
     status, product = db.select_by_id('product', product_id)
     gitlab_url = product['gitlab_url']
     master = product['salt_master_id']
-    #gitlab_project_url = gitlab_url.replace('http://', 'git@').replace(':80', ':root/')+project_name+'.git'
-    gitlab_project_url = gitlab_url.replace(':80', '/root/') + project_name + '.git'
+    gitlab_project_url = gitlab_url.replace('http://', 'git@').replace(':80', ':root/')+project_name+'.git'
+    #gitlab_project_url = gitlab_url.replace(':80', '/root/') + project_name + '.git'
     command_list = []
     command_list.append('cd /tmp/' + ' \n ')
     command_list.append('git clone '+gitlab_project_url + ' \n ')
