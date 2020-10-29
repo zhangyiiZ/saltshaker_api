@@ -150,10 +150,13 @@ def git_clone(product_id, project_name):
     master = product['salt_master_id']
     #gitlab_project_url = gitlab_url.replace('http://', 'git@').replace(':80', ':root/')+project_name+'.git'
     gitlab_project_url = gitlab_url.replace(':80', ':root/') + project_name + '.git'
-    command = 'git clone '+gitlab_project_url
-    logger.info('command'+command)
+    command_list = []
+    command_list.append('cd /tmp/' + ' \n ')
+    command_list.append('git clone '+gitlab_project_url + ' \n ')
+    command_final = ''.join(command_list)
+    logger.info('command'+command_final)
     salt_api = salt_api_for_product(product_id)
-    exec_result = salt_api.shell_remote_execution([master], command)
+    exec_result = salt_api.shell_remote_execution([master], command_final)
 
 
 
