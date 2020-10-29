@@ -4,7 +4,7 @@ from flask import g
 from common.log import loggers
 from common.audit_log import audit_log
 from common.db import DB
-from common.utility import uuid_prefix
+from common.utility import uuid_prefix, salt_api_for_product
 from common.sso import access_required
 import json
 
@@ -46,7 +46,7 @@ class Projects(Resource):
         try:
             status, message = update_group_for_delete_project(project_id)
         except Exception as e:
-            logger.info('Exception:'+str(e))
+            logger.info('Exception:' + str(e))
         if status is not True:
             return {"status": False, "message": message}, 500
         status, result = db.delete_by_id("projects", project_id)
@@ -126,6 +126,7 @@ class ProjectsList(Resource):
             if len(result) == 0:
                 try:
                     create_git_project(args['product_id'], args['gitlab_name'])
+                    git_clone(args['product_id'], args['gitlab_name'])
                 except Exception as e:
                     return {"status": False, "message": str(e)}, 500
                 insert_status, insert_result = db.insert("projects", json.dumps(project, ensure_ascii=False))
@@ -140,6 +141,19 @@ class ProjectsList(Resource):
         else:
             db.close_mysql()
             return {"status": False, "message": result}, 500
+
+
+def git_clone(product_id, project_name):
+    db = DB()
+    status, product = db.select_by_id('product', product_id)
+    gitlab_url = product['gitlab_url']
+    master = product['salt_master_id']
+    gitlab_project_url = gitlab_url.replace('http://', 'git@').replace(':80', ':root/')+project_name+'.git'
+    command = 'git clone '+gitlab_project_url
+    logger.info('command'+command)
+    salt_api = salt_api_for_product(product_id)
+    exec_result = salt_api.shell_remote_execution([master], command)
+
 
 
 def update_group_for_create_project(project_name, groups_id_list):
@@ -200,6 +214,7 @@ def update_group_for_update_project(project_id, new_group_list, project_new_name
         message = str(e)
     logger.info('status_final' + str(status_final))
     return status_final, message
+
 
 def update_group_for_delete_project(project_id):
     db = DB()
