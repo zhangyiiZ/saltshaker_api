@@ -73,6 +73,8 @@ class Target(Resource):
         db = DB()
         status, result = db.select_by_id('target', target_id)
         origion_IP = result['IP']
+        host_id = result['host_id']
+        args['host_id'] = host_id
         if origion_IP != args['IP']:
             status, message = judge_target_IP_exist(args['IP'], args['host_id'])
             if status is not True:
